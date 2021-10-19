@@ -10,7 +10,10 @@
 db.Model(&user).Related(&company)
 //// SELECT * FROM company WHERE user_id = 1; // 1 is user's primary key
 ```
+
+
 开启sql打印一目了然
+
 ```go
 // 启用Logger，显示详细日志
 db.LogMode(true)
