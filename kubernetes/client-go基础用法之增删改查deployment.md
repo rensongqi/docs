@@ -10,8 +10,6 @@ windows 在家目录下创建一个.kube文件夹，然后把k8s的config文件�
 
 linux 也是需要在go运行的机器上放置k8s访问config文件，位置：`~/.kube/config`
 
-@[TOC]
-
 ## 2.1 创建clientSet
 
 ```go
