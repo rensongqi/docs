@@ -26,7 +26,7 @@ Ansible是一种IT自动化工具。它可以配置系统，部署软件以及�
 配置主机清单（**/etc/ansible/hosts**）
 
 ```
-[webservers]
+[servers]
 alpha.example.org
 beta.example.org
 192.168.1.100
@@ -48,7 +48,7 @@ ad-hoc命令是理解Ansible和在学习playbooks之前需要掌握的基础知�
 SSH密码认证：（**/etc/ansible/hosts**）
 
 ```
-[webservers]
+[servers]
 192.168.1.100:22 ansible_ssh_user=root ansible_ssh_pass=’123456’
 192.168.1.101:22 ansible_ssh_user=root ansible_ssh_pass=’123456’
 ```
@@ -61,7 +61,7 @@ ssh-keygen -t rsa
 ssh-copy-id -i /root/.ssh/id_rsa.pub root@192.168.189.128
 
 # 配置
-[webservers]
+[servers]
 10.206.240.111:22 ansible_ssh_user=root ansible_ssh_key=/root/.ssh/id_rsa 
 10.206.240.112:22 ansible_ssh_user=root
 
@@ -88,7 +88,7 @@ private_key_file = /root/.ssh/id_rsa  # 默认路径
 ansible all -m ping
 ansible all -m shell -a "ls /root"
 ansible all -m shell -a "ls /root; touch /tmp/a.txt"
-ansible webservers -m copy –a "src=/etc/hosts dest=/tmp/hosts"
+ansible servers -m copy –a "src=/etc/hosts dest=/tmp/hosts"
 ```
 
 # 4 常用模块
@@ -102,6 +102,9 @@ ansible-doc –s copy 查看模块文档
 ## 4.1 shell
 
 在目标主机执行shell命令。
+
+`ansible all -m shell -a "ls /root"`
+`ansible all -m shell -a "ls /root; touch /tmp/a.txt"`
 
 ```
 - name: 将命令结果输出到指定文件
@@ -125,6 +128,8 @@ ansible-doc –s copy 查看模块文档
 
 将文件复制到远程主机。
 
+`ansible servers -m copy -a "src=/etc/hosts dest=/tmp/hosts mode=777"`
+
 ```
 - name: 拷贝文件
   copy:
@@ -142,11 +147,18 @@ ansible-doc –s copy 查看模块文档
 
 管理文件和文件属性。
 
+`ansible servers -m file -a "path=/tmp/hosts state=absent"`
+
 ```
 - name: 创建目录
   file:
     path: /etc/some_directory
     state: directory
+    mode: '0755'
+- name: 创建文件
+  file:
+    path: /etc/some_directory
+    state: touch
     mode: '0755'
 - name: 删除文件
   file:
@@ -158,13 +170,15 @@ ansible-doc –s copy 查看模块文档
     state: absent
 ```
 
+## 4.4 yum
+
+软件包管理。
+
 present，latest：表示安装
 
 absent：表示卸载
 
-## 4.4 yum
-
-软件包管理。
+`ansible servers -m yum -a "name=ansible state=latest"`
 
 ```
 - name: 安装最新版apache
@@ -196,6 +210,8 @@ absent：表示卸载
 ## 4.5 service/systemd
 
 管理服务。
+
+`ansible servers -m systemd -a "name=nginx state=started enabled=yes"`
 
 ```
 - name: 服务管理
@@ -255,7 +271,7 @@ https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
 
 ```
 ---
-- hosts: webservers
+- hosts: servers
   vars:
     http_port: 80
     server_name: www.ctnrs.com
@@ -275,10 +291,19 @@ https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
       service: name=nginx state=reloaded
 ```
 
+| 模块         | 作用                                                         | 备注                           |
+| ------------ | ------------------------------------------------------------ | ------------------------------ |
+| hosts        | 指定主机或主机组                                             |                                |
+| vars         | 自定义变量                                                   |                                |
+| remote_user  | 指定远程的用户                                               |                                |
+| gather_facts | 是否获取被操作的主机的服务器信息，一般不用，会耗时           | true/false                     |
+| tasks        | 任务列                                                       |                                |
+| handlers     | tasks执行成功后会执行此字段，相当于shell中的&&；tasks执行失败不会执行此字段 | 需要nitify字段指定handlers字段 |
+
 ## 5.1 主机和用户
 
 ```
-- hosts: webservers
+- hosts: servers
   remote_user: lizhenliang
   become: yes
   become_user: root
@@ -301,12 +326,17 @@ ansible-playbook nginx.yaml -u lizhenliang -k -b -K
 在Inventory中定义变量。
 
 ```
-[webservers]
+[servers]
 192.168.1.100 ansible_ssh_user=root hostname=web1
 192.168.1.100 ansible_ssh_user=root hostname=web2
 
-[webservers:vars]
+# 针对指定组用户
+[servers:vars]
 ansible_ssh_user=root hostname=web1
+
+# 针对所有用户
+[all:vars]
+test=789
 ```
 
 - **单文件存储**
@@ -323,17 +353,19 @@ group_vars/all.yml  表示所有主机有效，等同于[all:vars]
 
 grous_vars/etcd.yml 表示etcd组主机有效，等同于[etcd:vars]
 
-```
+```bash
 # vi /etc/ansible/group_vars/all.yml
 work_dir: /data
-# vi /etc/ansible/host_vars/webservers.yml
+test: "csdcsdv"
+
+# vi /etc/ansible/host_vars/servers.yml
 nginx_port: 80
 ```
 
 - **在Playbook中定义**
 
 ```
-- hosts: webservers
+- hosts: servers
   vars:
     http_port: 80
     server_name: www.ctnrs.com
@@ -347,6 +379,18 @@ nginx_port: 80
 - debug:
     var: result
 ```
+
+**查看主机变量**
+
+```bash
+  # 查看所有内置变量
+  - debug: msg={{hostvars}}
+  
+  # 查看hostvar下边的变量可以直接引用，不用再加hostvars前缀
+  - debug: msg={{groups.all[0]}}
+```
+
+
 
 ## 5.3 任务列表
 
@@ -415,16 +459,24 @@ tasks:
   with_items:
      - testuser1
      - testuser2
+- name: 创建文件
+    file: path=/tmp/{{item}} state=touch
+    with_items:
+      - "1.txt"
+      - "2.txt"
+      - "3.txt"
+    tags: file
 ```
 
 ```
-- name: 解压
+- name: 拷贝文件
   copy: src={{ item }} dest=/tmp
   with_fileglob:
+    # 通配符
     - "*.txt"
 ```
 
-常用循环语句：
+**常用循环语句：**
 
 | 语句          | 描述         |
 | ------------- | ------------ |
@@ -439,11 +491,11 @@ tasks:
     domain: "www.ctnrs.com"
  tasks:
   - name: 写入nginx配置文件
-    template: src=/srv/server.j2 dest=/etc/nginx/conf.d/server.conf
+    template: src=/srv/nginx.conf dest=/etc/nginx/conf.d/server.conf
 ```
 
 ```
-# server.j2
+# nginx.conf
 {% set domain_name = domain %}
 server {
    listen 80;
@@ -451,6 +503,21 @@ server {
    location / {
         root /usr/share/html;
    }
+}
+
+# nginx.conf for循环写入主机ip
+{% set domain_name = domain %}
+upstream web {
+    {% for host in groups['servers'] %}
+        server {{ hostvars[host].inventory_hostname }};
+    {% endfor %}
+}
+server {
+    listen 80;
+    server_name {{ domain_name }};
+    location / {
+        root /var/www/html;
+    }
 }
 ```
 
@@ -498,7 +565,7 @@ Roles目录结构：
 
 ```
 site.yml
-webservers.yml
+servers.yml
 fooservers.yml
 roles/
    common/
@@ -509,7 +576,7 @@ roles/
      vars/
      defaults/
      meta/
-   webservers/
+   servers/
      tasks/
      defaults/
      meta/
@@ -528,19 +595,19 @@ roles/
 通常的做法是从`tasks/main.yml`文件中包含特定于平台的任务：
 
 ```
-# roles/webservers/tasks/main.yml
+# roles/servers/tasks/main.yml
 - name: added in 2.4, previously you used 'include'
   import_tasks: redhat.yml
   when: ansible_facts['os_family']|lower == 'redhat'
 - import_tasks: debian.yml
   when: ansible_facts['os_family']|lower == 'debian'
 
-# roles/webservers/tasks/redhat.yml
+# roles/servers/tasks/redhat.yml
 - yum:
     name: "httpd"
     state: present
 
-# roles/webservers/tasks/debian.yml
+# roles/servers/tasks/debian.yml
 - apt:
     name: "apache2"
     state: present
@@ -550,13 +617,12 @@ roles/
 
 ```
 # site.yml
-- hosts: webservers
+- hosts: servers
   roles:
     - common
-    - webservers
+    - servers
 
-
-定义多个：
+# 定义多个：
 - name: 0
   gather_facts: false
   hosts: all 
@@ -567,7 +633,110 @@ roles/
   gather_facts: false
   hosts: all 
   roles:
-    - webservers
+    - servers
+```
+
+## 6.3 demo示例
+
+1. **创建目录**
+
+```bash
+# cd /etc/ansible
+# mkdir -p group_vars roles/{nginx,k8s}/{files,templates,tasks}
+# tree
+.
+├── group_vars
+└── roles
+    ├── k8s
+    │   ├── files
+    │   ├── tasks
+    │   └── templates
+    └── nginx
+        ├── files
+        ├── tasks
+        └── templates
+
+10 directories, 0 files
+```
+
+2. **编写tasks**
+
+```bash
+# vim roles/nginx/tasks/main.yml
+- name: 安装nginx
+  yum: name=nginx state=latest
+
+- name: 安装lsof
+  yum: name=lsof state=latest
+
+- name: 查看var
+  shell: |
+    echo 123
+  register: result
+
+- name: debug
+  debug: var=result.stdout
+
+# roles拷贝文件时，copy模块的src是相对于files目录而言
+- name: copy
+  copy: src=test.txt dest=/opt/test2.txt
+
+# roles拷贝template时，template模块的src是相对templates目录而言
+- name: 拷贝template
+  template: src=nginx.conf dest=/opt/default.conf
+```
+
+3. **编写template**
+
+```bash
+# vim roles/nginx/templates/nginx.conf
+{% set domain_name = domain %}
+upstream web {
+    {% for host in groups['servers'] %}
+        server {{ hostvars[host].inventory_hostname }};
+    {% endfor %}
+}
+server {
+    listen 80;
+    server_name {{ domain_name }};
+    location / {
+        root /var/www/html;
+    }
+}
+```
+
+4. **定义环境变量**
+
+```bash
+# vim group_vars/all.yml 
+domain: www.rsq.com
+```
+
+5. **编写playbook入口yml**
+
+```bash
+# vim site.yml
+- name: 0
+  hosts: servers
+  gather_facts: false
+  remote_user: root
+  roles:
+    - nginx
+  tags: nginx
+
+- name: 1
+  hosts: servers
+  gather_facts: false
+  remote_user: root
+  roles:
+    - k8s
+  tags: k8s
+```
+
+6. **执行剧本**
+
+```bash
+# ansible-playbook site.yml --tags nginx
 ```
 
 ## 6.3 角色控制
