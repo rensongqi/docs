@@ -547,12 +547,11 @@ mysql> SHOW VARIABLES LIKE '%max_connect%';
 +------------------------+-------+
 ```
 
- 
 
 
 
 
+参考文章：
 
-
-
-参考文章：[SQL 教程](https://www.w3school.com.cn/sql/index.asp)
+- [SQL 基础教程 - w3school](https://www.w3school.com.cn/sql/index.asp)
+- [MySQL教程 - 菜鸟教程](https://www.runoob.com/mysql/mysql-transaction.html)
