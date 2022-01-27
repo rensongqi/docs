@@ -49,17 +49,17 @@ Go GC 的 STW 曾经是大家吐槽的焦点，因为它经常使你的系统卡
 
 示意图：
 
-![img](https:////upload-images.jianshu.io/upload_images/11662994-94548e98fe245de6.png?imageMogr2/auto-orient/strip|imageView2/2/w/741/format/webp)
+![img](https://upload-images.jianshu.io/upload_images/11662994-94548e98fe245de6.png?imageMogr2/auto-orient/strip|imageView2/2/w/741/format/webp)
 
 还有一种情况，标记过程中，堆上的 object 被赋值给了一个**栈上指针**，导致这个 object 没有被标记到。**因为对栈上指针进行写入，写屏障是检测不到的**。下图展示了整个流程(其中 L 是栈上指针)：
 
-![img](https:////upload-images.jianshu.io/upload_images/11662994-b2d93298df056f97.png?imageMogr2/auto-orient/strip|imageView2/2/w/758/format/webp)
+![img](https://upload-images.jianshu.io/upload_images/11662994-b2d93298df056f97.png?imageMogr2/auto-orient/strip|imageView2/2/w/758/format/webp)
 
 为了解决这个问题，标记的最后阶段，还会回头重新扫描一下所有的栈空间，确保没有遗漏。而这个过程就需要启动 STW 了，否则并发场景会使上述场景反复重现。
 
 整个 GC 流程如下图所示：
 
-![img](https:////upload-images.jianshu.io/upload_images/11662994-d448ce59cb2965aa.png?imageMogr2/auto-orient/strip|imageView2/2/w/1200/format/webp)
+![img](https://upload-images.jianshu.io/upload_images/11662994-d448ce59cb2965aa.png?imageMogr2/auto-orient/strip|imageView2/2/w/1200/format/webp)
 
 解释下：
 
@@ -78,7 +78,7 @@ Go GC 的 STW 曾经是大家吐槽的焦点，因为它经常使你的系统卡
 
 Go 在 1.8 版本引入了**混合写屏障**，其会在赋值前，对旧数据置灰，再视情况对新值进行置灰。大致如下图所示：
 
-![img](https:////upload-images.jianshu.io/upload_images/11662994-8994c6b1dc536940.png?imageMogr2/auto-orient/strip|imageView2/2/w/713/format/webp)
+![img](https://upload-images.jianshu.io/upload_images/11662994-8994c6b1dc536940.png?imageMogr2/auto-orient/strip|imageView2/2/w/713/format/webp)
 
 这样就不需要在最后回头重新扫描所有 Goroutine 的栈空间了，这使得整个 GC 过程 STW 几乎可以忽略不计了。
 
