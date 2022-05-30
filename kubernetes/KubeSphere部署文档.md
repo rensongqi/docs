@@ -75,7 +75,7 @@ hosts:
 ```
 # cd /etc/ansible/
 ansible-playbook k8s_single_master_install.yml
-
+```
 ## 2 配置nfs和storageClass
 ### 2.1 nfs server配置如下
 ```bash
