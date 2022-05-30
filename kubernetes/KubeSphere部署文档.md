@@ -485,3 +485,5 @@ NOTES：
 https://kubesphere.io             2022-05-30 13:50:14
 #####################################################
 ```
+
+参考博客：[k8s与kubesphere安装](https://blog.csdn.net/baidu_41860619/article/details/124920503)
