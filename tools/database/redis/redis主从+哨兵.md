@@ -8,7 +8,7 @@ services:
     image: harbor.rsq.cn/library/redis/redis:6.2.12-alpine3.18
     container_name: redis-master
     restart: always
-    command: redis-server --port 6379 --requirepass cowa2022  --appendonly yes
+    command: redis-server --port 6379 --requirepass xxxxxxxx  --appendonly yes
     ports:
       - 6379:6379
     volumes:
@@ -18,7 +18,7 @@ services:
     image: harbor.rsq.cn/library/redis/redis:6.2.12-alpine3.18
     container_name: redis-slave-1
     restart: always
-    command: redis-server --slaveof 172.16.104.109 6379 --port 6380  --requirepass cowa2022 --masterauth cowa2022  --appendonly yes
+    command: redis-server --slaveof 172.16.104.109 6379 --port 6380  --requirepass xxxxxxxx --masterauth xxxxxxxx  --appendonly yes
     ports:
       - 6379:6379
     volumes:
@@ -29,7 +29,7 @@ services:
     image: harbor.rsq.cn/library/redis/redis:6.2.12-alpine3.18
     container_name: redis-slave-2
     restart: always
-    command: redis-server --slaveof 172.16.104.109 --port 6381  --requirepass cowa2022 --masterauth cowa2022  --appendonly yes
+    command: redis-server --slaveof 172.16.104.109 --port 6381  --requirepass xxxxxxxx --masterauth xxxxxxxx  --appendonly yes
     ports:
       - 6379:6379
     volumes:
@@ -78,7 +78,7 @@ port 26379
 dir "/tmp"
 sentinel deny-scripts-reconfig yes
 sentinel monitor mymaster 172.16.104.111 6379 2
-sentinel auth-pass mymaster cowa2022
+sentinel auth-pass mymaster xxxxxxxx
 ```
 
 # 3 单节点实例
@@ -90,7 +90,7 @@ services:
     image: harbor.rsq.cn/library/redis/redis:6.2.12-alpine3.18
     container_name: redis-master
     restart: always
-    command: redis-server --port 6379 --requirepass cowa2022  --appendonly yes
+    command: redis-server --port 6379 --requirepass xxxxxxxx  --appendonly yes
     ports:
       - 6379:6379
     volumes:

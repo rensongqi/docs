@@ -69,7 +69,7 @@ cd ~/openssl
 ssh-keygen \
   -s ./ca_ssh.key \
   -I rensongqi \
-  -n root,cowa \
+  -n root,guest \
   -V +24h \
   client/client_ssh.pub
 # 执行完命令会输出如下信息
@@ -82,7 +82,7 @@ ssh-keygen \
 ssh-keygen签发证书参数解析：
 - -s ./ca_ssh.key - 指定CA签名的私钥 。
 - -I rensongqi - 客户证书的密钥标识信息，可写写客户端的主机名。
-- -n root,cowa - 客户端可用于登录主机的用户名（多个用户以逗号分隔）。
+- -n root,guest - 客户端可用于登录主机的用户名（多个用户以逗号分隔）。
 - -V +24h - 证书有效期，从现在起24个小时（可选）。
 - client/client_ssh.pub - 客户端的公钥。
 
@@ -117,7 +117,7 @@ client.key-cert.pub:
         Valid: from 2023-12-13T14:49:00 to 2023-12-14T14:50:24
         Principals: 
                 root
-                cowa
+                guest
         Critical Options: (none)
         Extensions: 
                 permit-X11-forwarding

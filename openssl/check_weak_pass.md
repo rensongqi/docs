@@ -1,7 +1,7 @@
 
 # 通过shell脚本实现弱密码检查
 
-1. 对比/etc/shadow文件中cowa用户是否存在弱密码，支持主流的md5、blowfish、sha-256、sha-512、yescrypt算法
+1. 对比/etc/shadow文件中guest用户是否存在弱密码，支持主流的md5、blowfish、sha-256、sha-512、yescrypt算法
 2. 存在弱密码则修改密码，并把新密码加盐后使用公钥加密存放在/etc/product/.passwd文件中
 3. 如果密码修改失败，则用户密码回退至旧密码
 4. 每隔15天密码将自动重置以防止密码泄露
@@ -99,14 +99,8 @@ dict=("!@#"
 "woaini"
 "xiaoming"
 "zzzzzz"
-"cowa"
-"cowa2022"
-"cowa2021"
-"cowa2020"
-"cowa123"
-" "
-"cowa2018"
-"Cowa2018")
+"xxxxxxxx"
+" ")
 
 pub_key="-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6F+9rKUlGqEo02NOkRGK\nlsgpMVS5mQKmLCpwOvQzGjOUZM08aC1q/Ygt9iXS/FdSrcB7b3cl99sMizZCdHRz\nHEWH9mmeArjY60Nm4QL/cFD8YTm8z0SAcwJZQT1cPGG5YkoQeTnwYLoxjVx75fzt\nsv2iTscLQZ+vXu1oO1k7Bh0bK8FLEsifp9o5a5CqpvYJTJiCdX0xAHfFu8HBsVlH\nklow+Eghc0PPa16pJg0o8VNcHMZdpsHL0k134Mm0rehbuYpuAL2s8l69BiU/44+Y\nfK+hm8frYjVoEBOt2EBKeFbeeHM0YotKkogKnFQ87vTrrvBcPW7YDiKO+5FVUqQY\nQQIDAQAB\n-----END PUBLIC KEY-----"
 pub_path="/tmp/client.pub"
@@ -156,7 +150,7 @@ change_current_user_pass() {
         old_pass_en=$(<$pass_file_path-temp)
         old_pass=$(echo $old_pass_en | cut -c 1-12)
         generate_rand_pass
-        change_pass "cowa" $old_pass $new_pass
+        change_pass "guest" $old_pass $new_pass
     fi
 }
 
@@ -186,7 +180,7 @@ check_pass() {
 
                 hashed=$(perl -e "print crypt('$t', '\$$const\$$salt\$')")
 
-                if [ "$hashed" == "$password" ] && [ "$username" == "cowa" ]; then
+                if [ "$hashed" == "$password" ] && [ "$username" == "guest" ]; then
                     generate_rand_pass
                     change_pass $username $t $new_pass
                     echo "$username [$t]"
@@ -208,7 +202,7 @@ check_pass() {
 
                 hashed=$(perl -e "print crypt('$t', '\$$const\$$str\$$salt\$')")
 
-                if [ "$hashed" == "$password" ] && [ "$username" == "cowa" ]; then
+                if [ "$hashed" == "$password" ] && [ "$username" == "guest" ]; then
                     generate_rand_pass
                     change_pass $username $t $new_pass
                     echo "$username [$t]"

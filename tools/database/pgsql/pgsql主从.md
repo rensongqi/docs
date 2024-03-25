@@ -30,7 +30,7 @@ sudo systemctl restart postgresql-14
 ```bash
 su - postgres
 psql
-alter user postgres with password 'cowa2022';
+alter user postgres with password 'xxxxxxxx';
 
 # 创建复制
 CREATE ROLE replica login replication encrypted password 'replica';
