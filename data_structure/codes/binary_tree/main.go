@@ -1,11 +1,3 @@
-/**
-                   stu1
-                 /     \
-               stu2     stu3
-             /     \      \
-           stu4    stu5   stu6
-**/
-
 package main
 
 import "fmt"
@@ -17,7 +9,8 @@ type Student struct {
 	Right *Student
 }
 
-// 前序遍历
+// PreOrder 前序遍历
+// 逻辑：先访问根节点，然后递归地对左子树进行前序遍历，最后递归地对右子树进行前序遍历
 func PreOrder(rootNode *Student) {
 	if rootNode != nil {
 		fmt.Printf("%d\t %s\n", rootNode.No, rootNode.Name)
@@ -26,7 +19,8 @@ func PreOrder(rootNode *Student) {
 	}
 }
 
-// 中序遍历
+// InfixOrder 中序遍历
+// 逻辑：先递归地对左子树进行中序遍历，然后访问根节点，最后递归地对右子树进行中序遍历
 func InfixOrder(rootNode *Student) {
 	if rootNode != nil {
 		InfixOrder(rootNode.Left)
@@ -35,7 +29,8 @@ func InfixOrder(rootNode *Student) {
 	}
 }
 
-// 后序遍历
+// PostOrder 后序遍历
+// 逻辑：先递归地对左子树进行后序遍历，然后递归地对右子树进行后序遍历，最后访问根节点
 func PostOrder(rootNode *Student) {
 	if rootNode != nil {
 		PostOrder(rootNode.Left)
@@ -45,6 +40,14 @@ func PostOrder(rootNode *Student) {
 }
 
 func main() {
+	/**
+	                   stu1
+	                 /     \
+	               stu2     stu3
+	             /     \      \
+	           stu4    stu5   stu6
+	**/
+	// 构造一个二叉树
 	stu1 := &Student{No: 1, Name: "tom"}
 	stu2 := &Student{No: 2, Name: "jerry"}
 	stu3 := &Student{No: 3, Name: "tommy"}
@@ -59,13 +62,13 @@ func main() {
 	stu2.Right = stu5
 	stu3.Right = stu6
 
-	//遍历树
+	//前序遍历
 	PreOrder(stu1)
 	fmt.Println()
+	//中序遍历
 	InfixOrder(stu1)
 	fmt.Println()
-
+	//后序遍历
 	PostOrder(stu1)
 	fmt.Println()
-
 }

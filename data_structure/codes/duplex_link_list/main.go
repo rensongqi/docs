@@ -10,8 +10,8 @@ type HeroNode struct {
 	next     *HeroNode // 这个表示指向下一个节点
 }
 
-// 给双向链表插入一个节点
-// func 1: 在单链表的最后加入
+// InsertHeroNode 给双向链表插入一个节点
+// 在双链表的最后加入
 func InsertHeroNode(head *HeroNode, newHeroNode *HeroNode) {
 	// 1、先找到该链表的最后这个节点
 	// 2、创建一个辅助节点
@@ -28,7 +28,7 @@ func InsertHeroNode(head *HeroNode, newHeroNode *HeroNode) {
 	newHeroNode.pre = temp
 }
 
-// 删除链表节点
+// DelHeroNode 删除链表节点
 func DelHeroNode(head *HeroNode, id int) {
 	temp := head
 	flag := true
@@ -56,7 +56,7 @@ func DelHeroNode(head *HeroNode, id int) {
 	fmt.Println()
 }
 
-// 根据no的编号从小到大插入数据
+// InsertSortHeroNode 根据no的编号从小到大插入数据
 func InsertSortHeroNode(head *HeroNode, newHeroNode *HeroNode) {
 	// 1、找到该链表适当的节点
 	// 2、创建一个辅助节点
@@ -90,7 +90,7 @@ func InsertSortHeroNode(head *HeroNode, newHeroNode *HeroNode) {
 	}
 }
 
-// 按顺序显示链表的所有节点信息
+// ListHeroNode 按顺序显示链表的所有节点信息
 func ListHeroNode(head *HeroNode) {
 	// 创建一个辅助节点
 	temp := head
@@ -112,7 +112,7 @@ func ListHeroNode(head *HeroNode) {
 	fmt.Println()
 }
 
-// 逆序显示链表的所有节点信息
+// ReverseListHeroNode 逆序显示链表的所有节点信息
 func ReverseListHeroNode(head *HeroNode) {
 	// 1、创建一个辅助节点
 	temp := head

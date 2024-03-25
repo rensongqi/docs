@@ -9,8 +9,8 @@ type HeroNode struct {
 	next     *HeroNode // 这个表示指向下一个节点
 }
 
-// 给链表插入一个节点
-// func 1: 在单链表的最后加入
+// InsertHeroNode 给链表插入一个节点
+// 在单链表的最后加入
 func InsertHeroNode(head *HeroNode, newHeroNode *HeroNode) {
 	// 1、先找到该链表的最后这个节点
 	// 2、创建一个辅助节点
@@ -50,7 +50,7 @@ func DelHeroNode(head *HeroNode, id int) {
 	fmt.Println()
 }
 
-// 根据no的编号从小到大插入数据
+// InsertSortHeroNode 根据no的编号从小到大插入数据
 func InsertSortHeroNode(head *HeroNode, newHeroNode *HeroNode) {
 	// 1、找到该链表适当的节点
 	// 2、创建一个辅助节点
@@ -80,7 +80,7 @@ func InsertSortHeroNode(head *HeroNode, newHeroNode *HeroNode) {
 	}
 }
 
-// 显示链表的所有节点信息
+// ListHeroNode 显示链表的所有节点信息
 func ListHeroNode(head *HeroNode) {
 	// 创建一个辅助节点
 	temp := head

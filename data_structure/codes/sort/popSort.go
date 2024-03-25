@@ -4,20 +4,15 @@
  * @Date 2023/12/28 23:03
  **/
 
-package pop_sort
+package main
 
 import (
 	"fmt"
 	"time"
 )
 
-func swap(nums []int, i, j int) {
-	temp := nums[i]
-	nums[i] = nums[j]
-	nums[j] = temp
-	fmt.Println("swap sort nums: ", nums)
-}
-
+// PopSort1 冒泡排序逻辑：两层循环，外层控制循环次数，内层遍历对比大小
+// 时间复杂度：时间复杂度O(N^2), 空间复杂度：1
 func PopSort1(nums []int) {
 	startTime := time.Now().UnixNano()
 	for i := len(nums) - 1; i > 0; i-- {

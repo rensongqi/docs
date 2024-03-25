@@ -8,7 +8,7 @@ type CatNode struct {
 	next *CatNode
 }
 
-// 环形链表插入数据
+// InsertCatNode 环形链表插入数据
 func InsertCatNode(head *CatNode, newCatNode *CatNode) {
 	// 1、判断是不是添加第一只猫
 	if head.next == nil {
@@ -32,7 +32,7 @@ func InsertCatNode(head *CatNode, newCatNode *CatNode) {
 
 }
 
-// 查看环形链表
+// ListCircleList 查看环形链表
 func ListCircleList(head *CatNode) {
 	fmt.Println("环形链表的具体情况如下：")
 	temp := head
@@ -49,9 +49,9 @@ func ListCircleList(head *CatNode) {
 	}
 }
 
-// 删除环形链表中的数据
+// DelCatNode 删除环形链表中的数据
 func DelCatNode(head *CatNode, id int) {
-
+	// todo
 }
 
 func main() {
