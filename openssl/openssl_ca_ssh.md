@@ -131,6 +131,7 @@ client.key-cert.pub:
 ### 2.1 包签名
 
 ![openssl sign](../img/openssl_ca_sign.png)
+
 PS：上图中的操作都在客户端进行模拟测试：
 
 客户端使用自己的私钥client.key对文件进行加密，然后使用签发的证书中提取出来的公钥进行解密
