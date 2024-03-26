@@ -1,0 +1,5 @@
+- include_tasks: ubuntu_optimization.yml
+  when: machine_type == 'Ubuntu'
+
+- include_tasks: centos_optimization.yml
+  when: machine_type == 'CentOS'

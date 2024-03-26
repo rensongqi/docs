@@ -1,0 +1,32 @@
+---
+- name: Debug打印Ubuntu版本
+  debug:
+    msg: "Ubuntu版本是 {{ ansible_distribution_version }}"
+
+- name: 获取当前日期时间戳
+  set_fact:
+    timestamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+
+- name: 备份源文件
+  copy:
+    src: "/etc/apt/sources.list"
+    dest: "/etc/apt/sources.list_bk_{{ timestamp }}"
+    remote_src: yes
+
+- name: 根据Ubuntu版本选择源文件模板
+  set_fact:
+    ubuntu_version_template: "{{ 'apt_sources_' + ansible_distribution_version + '.j2' }}"
+
+- name: 写入新源内容（根据Ubuntu版本选择源文件）
+  template:
+    src: "{{ ubuntu_version_template | default('apt_sources.j2') }}"
+    dest: '/etc/apt/sources.list'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 执行apt-get update
+  apt:
+    update_cache: yes
+  failed_when: false
+  changed_when: false

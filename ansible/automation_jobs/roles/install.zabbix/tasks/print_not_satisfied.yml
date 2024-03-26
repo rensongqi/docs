@@ -1,0 +1,5 @@
+# print_not_satisfied.yml
+---
+- name: 这不是1网段和3网段的机器
+  debug:
+    msg: "这不是1网段和3网段的机器"

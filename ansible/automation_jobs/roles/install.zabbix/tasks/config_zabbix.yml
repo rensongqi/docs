@@ -1,0 +1,12 @@
+- name: 配置zabbix
+  template:
+    src: zabbix_config.j2
+    dest: '/etc/zabbix/zabbix_agentd.conf'
+    owner: root
+    mode: 0644
+
+- name: 重启并enable zabbix-agent
+  service:
+    name: zabbix-agent
+    state: restarted
+    enabled: yes

@@ -1,0 +1,146 @@
+---
+- name: 检查操作系统类型
+  set_fact:
+    os_distribution: "{{ ansible_distribution }}"
+  when: "'{{ ansible_distribution }}' in ['Ubuntu', 'CentOS']"
+
+- name: 对ssh_config和sshd_config取消特殊权限，相当于chattr -i
+  file:
+    path: "{{ item }}"
+    attr: -i
+  with_items:
+    - /etc/ssh/ssh_config
+    - /etc/ssh/sshd_config
+
+- name: 修改ssh_config和sshd_config的配置文件，允许root免密登录
+  shell: |
+    sed -i '/PermitRootLogin/d' /etc/ssh/ssh_config
+    sed -i '/PasswordAuthentication/d' /etc/ssh/ssh_config
+    sed -i '/PermitRootLogin/d' /etc/ssh/sshd_config
+    sed -i '/PasswordAuthentication/d' /etc/ssh/sshd_config
+    echo 'PermitRootLogin yes' | tee -a /etc/ssh/ssh_config
+    echo 'PasswordAuthentication yes' | tee -a /etc/ssh/ssh_config
+    echo 'PermitRootLogin yes' | tee -a /etc/ssh/sshd_config
+    echo 'PasswordAuthentication yes' | tee -a /etc/ssh/sshd_config
+
+- name: 修改内核参数，防止sshd reload失败
+  shell: "echo 1048576 > /proc/sys/fs/inotify/max_user_watches"
+
+- name: 重载配置并reload sshd
+  systemd:
+    state: reloaded
+    daemon_reload: yes
+    name: sshd
+
+- name: 获取gpfs安装包
+  shell: |
+    curl -o /tmp/Spectrum_Scale_Erasure_Code-5.1.4.1-x86_64-Linux-install http://apt.rsq.cn/bundle/Spectrum_Scale_Erasure_Code-5.1.4.1-x86_64-Linux-install
+
+- name: 修改安装包的权限
+  file:
+    path: "/tmp/Spectrum_Scale_Erasure_Code-5.1.4.1-x86_64-Linux-install"
+    mode: 0777
+
+- name: 获取gpfs server的公钥
+  get_url:
+    url: http://apt.rsq.cn/bundle/gpfs.pub
+    dest: /tmp/
+
+- name: 将gpfs server的公钥注入root的认证文件中
+  authorized_key:
+    user: root
+    state: present
+    key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDSMxqcAyjApE74C5UpvVxFFqZJ/qOx5MvKVQMiUOiDe1BGLhEebh7aMkzjUy6FspKsQTJg09PZkdU24TG9N7D1zoCLCU5mG4aGgem7x7jUBfFQaprbOJKTxptb/hQGGsfYJJ05NPqDQpo7SjIECxvgTlbsmOy5TS6JiSSMtAQW7Xw+NSWxDREVX7Fbg4U+daonhGwplboN4SYR/dczVFbFXGzh9VizcPz2mbs56xE1ejMfX3G92BdVvtZor2vQu4IAdv4zuRIkcMGTyV1cMLF04ZHRFAeskqIO5BNBIbzLpSdktkhvEVCvjsWeliI3z2ia9J9YjyWSS2rx/IjXJiyhP2VoIg8AQK3X3BkWPPMGJ2Vgf5Ky2yoNSgiGZKJiLlZy1YfvYYJ9kRFRfh/v5NwMDAQwY/UhFoAI9buMF9vIapxuj+vaE5nlDHkJtJHmv7QCZjeyLxx7f0jtY7RTqP4ftaozPOJBgpAE7QFyx1Mbc3ql7oJFx2kqAOFT8QWOVR8= root@gpfs-ssd01"
+
+- name: 确保authorized_keys文件的权限是600
+  file:
+    path: /root/.ssh/authorized_keys
+    mode: '0600'
+
+- name: 安装依赖 - Ubuntu
+  apt:
+    pkg:
+      - ksh
+      - libaio1
+      - gcc
+      - g++
+      - m4
+      - make
+      - openjdk-11-jdk
+  when: os_distribution == 'Ubuntu'
+
+- name: 安装依赖 - CentOS
+  yum:
+    name:
+      - ksh
+      - libaio
+      - gcc
+      - gcc-c++
+      - m4
+      - make
+  when: os_distribution == 'CentOS'
+
+- name: 检查基础包是否已安装，如安装则跳过 - Ubuntu
+  shell: |
+    dpkg -l|grep gpfs|wc -l
+  register: before_install_check
+  when: os_distribution == 'Ubuntu'
+
+- name: 检查基础包是否已安装，如安装则跳过 - CentOS
+  shell: |
+    rpm -qa|grep gpfs|wc -l
+  register: before_install_check
+  when: os_distribution == 'CentOS'
+
+- name: 解压缩
+  shell: sudo echo 1|/tmp/Spectrum_Scale_Erasure_Code-5.1.4.1-x86_64-Linux-install
+  when: before_install_check != '9'
+
+- name: 使用dpkg安装依赖 - Ubuntu
+  shell: dpkg -i gpfs.base*.deb && dpkg -i gpfs.gpl*.deb && dpkg -i gpfs.msg.en*.deb && dpkg -i gpfs.gskit*.deb && dpkg -i gpfs.crypto*.deb && dpkg -i gpfs.adv*.deb && dpkg -i gpfs.license*.deb && dpkg -i gpfs.docs*.deb && dpkg -i gpfs.java*.deb
+  args:
+    chdir: "/usr/lpp/mmfs/5.1.4.1/gpfs_debs"
+  when: before_install_check != '9' and os_distribution == 'Ubuntu'
+
+- name: 使用yum安装依赖 - CentOS
+  shell: yum install -y gpfs.base*.rpm && yum install -y gpfs.gpl*.rpm && yum install -y gpfs.msg.en*.rpm && yum install -y gpfs.gskit*.rpm && yum install -y gpfs.crypto*.rpm && yum install -y gpfs.adv*.rpm && yum install -y gpfs.license*.rpm && yum install -y gpfs.doc*.rpm && yum install -y gpfs.java*.rpm
+  args:
+    chdir: "/usr/lpp/mmfs/5.1.4.1/gpfs_rpms"
+  when: before_install_check != '9' and os_distribution == 'CentOS'
+
+- name: 程序编译
+  shell: /usr/lpp/mmfs/bin/mmbuildgpl
+  when: before_install_check != '9'
+
+- name: 检查编译是否成功 - Ubuntu
+  shell: |
+    dpkg -l|grep gpfs|wc -l
+  register: install_result
+  when: os_distribution == 'Ubuntu'
+
+- name: 检查编译是否成功 - CentOS
+  shell: |
+    rpm -qa|grep gpfs|wc -l
+  register: install_result
+  when: os_distribution == 'CentOS'
+
+- name: 添加配置
+  lineinfile:
+    path: /etc/profile
+    line: 'export PATH="/usr/lpp/mmfs/bin:$PATH"'
+    state: present
+  when: before_install_check != '9'
+
+- name: Source /etc/profile
+  shell: |
+    source /etc/profile
+  args:
+    executable: /bin/bash
+
+- name: 隐藏ces目录
+  shell: touch /var/mmfs/etc/ignoreAnyMount.ces
+
+- name: 判断当前机器是否存在IB网卡，存在则注册IB网卡端口
+  shell: |
+    ibstat | grep -B10 'Rate: 100' | awk -F"'" 'NR==1{print $(NF-1)}'
+  register: ib_port_name

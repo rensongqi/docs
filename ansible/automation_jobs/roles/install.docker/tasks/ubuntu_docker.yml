@@ -1,0 +1,39 @@
+---
+- name: 安装必要插件
+  apt:
+    pkg:
+      - apt-transport-https
+      - ca-certificates
+      - software-properties-common
+      - curl
+
+- name: 配置gpg
+  shell: curl -fsSL https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu/gpg | sudo apt-key add -
+
+- name: 修改为内部docker源
+  template:
+    src: docker_ubuntu.j2
+    dest: '/etc/apt/sources.list.d/docker-ce.list'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 执行apt-get update
+  apt:
+    update_cache: yes
+
+- name: 更新缓存安装docker
+  apt:
+    name: docker-ce
+    update_cache: yes
+
+- name: 修改docker daemon.json配置文件
+  template:
+    src: docker_daemon_ubuntu.j2
+    dest: '/etc/docker/daemon.json'
+    owner: root
+    group: root
+    mode: 0644
+  become: True
+
+- include_tasks: config.yml

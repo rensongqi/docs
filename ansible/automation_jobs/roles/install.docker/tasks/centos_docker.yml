@@ -1,0 +1,32 @@
+---
+- name: 安装必要插件
+  yum:
+    name:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+
+- name: 添加docker yum源
+  template:
+    src: docker_centos.j2
+    dest: '/etc/yum.repos.d/docker-ce.repo'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 修改docker daemon.json配置文件
+  template:
+    src: docker_daemon_centos.j2
+    dest: '/etc/docker/daemon.json'
+    owner: root
+    group: root
+    mode: 0644
+  become: True
+
+- name: 安装docker
+  yum:
+    name:
+      - docker-ce
+    update_cache: yes
+
+- include_tasks: config.yml

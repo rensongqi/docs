@@ -1,0 +1,21 @@
+---
+- name: 为guestadmin用户种公钥
+  lineinfile:
+    path: /home/guestadmin/.ssh/authorized_keys
+    line: "{{ item }}"
+    state: "present"
+    create: yes
+  with_items:
+    - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6/0ysp6tsCul9s8+088aM9e9vyqCDr0VkLnAsRUWaiaso4wkvIcRFV2ln5efb6CHOp+b87KJh5UQtSUXx6nDvcWiZbepIRve6iItoGPYasyQhdfF4ZWcsR/W7xFGpt0b3MDe9/qjrXgEqAS2nNlHFtHKMxQ7dSpTpPFURaEng7A/nBJSQGqMqIGn/1Onto9dgI1bGIhLCyTQhG3GzmInBf5pne2SWN12LDLbtVR91EQ9xOYRMgXSeV+WACLexNOw4/JbX8JiC5k2Cc7AdI96C1sqV0Tbj14DlFKkodJoteZchCJTbRv/ucC3adTl3Eft2HLID5Q8hBDueH3ybVum/ user@SHJDP-JUMPER01"
+    - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDWgJrCBboOEGja1+mf28NZ70U1uKTG/HQIi5uRwOZJlKROxuQyZ4jyrB1q/xW/HSNyGlS/R9QUGUsFknbs0vZEffesW9TqL0aGhkFNWSxh4LoHaqJnn+A6A1IcZQtbXb481wUhx5XOH4vVbAoQ9reLmSlcldPA0MChEdDMhjm1pmLRlTJoT9j4XqBHUD/ED6GzZDbBIyjzbjH+ZaPmYcCywi5nki4kkusHp5u+OxYWUcOvVwIzY3eH2ZJsEzN8nLSarlbaw7XMq8nRLbYDa501eJgL5uTovSTw87/0mS25Ekc2JM9WYt7iWpFvG9iSX9SJxWzT5v6ftDTXAM15rvp+LnbRFlP/pmIEqcCp9pMlrh9YLkYFLlcQZl61rdPCtxsPjuaWeR1vVzVC1z7S0uY/cUKHxxfr7yZoaWEMIRgjo8Fb16oFgXsqNsWPE0bTPkdoYnCr2MdajJ00dVsM3Yr636hLwPQOjHibLwowIMBcR+gXGPdEIVPMgA0F9ifUSc8= admin@DESKTOP-3QJ3KNF"
+
+
+- name: 为guest用户种公钥
+  lineinfile:
+    path: /home/guest/.ssh/authorized_keys
+    line: "{{ item }}"
+    state: "present"
+    create: yes
+  with_items:
+    - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcRxf8L4FNj6gXB0BGcQ6/79vI4qAEotZk6hRWzZRCkiBOvvCNfuRSVIKffQRHRnHf/EhPdGx+ALOETFG2jFj7eTCnwdu56in2ANhI80eT53v0zFcob/1dMD9y5l4SnL5vQljZDmQh/B1q0nxvRMtFFqL7mIPm/xginTSNzMwlmJ/9gl7vqADp3fdbWUuAshmRJMe9+Pkd5A5/62TTHnutsRU+ZH5ki71Ztw0KPzA1GoJAGrbx/G5foq3dIKf5SBFepMoeEyruR/N7Wpl6PXQqQ70uMRjxdFYtjkCMTRWO9HsWN5ej42Qv80zxNUfnDmWu+be6Y02V+aYNTst4t56X guest@SHJDP-JUMPER01"
+

@@ -1,0 +1,42 @@
+# 先获取执行playbook的hosts列表
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: test
+      debug:
+        msg: "{{ inventory_ips }}"
+    - name: 处理传递过来的ip地址
+      set_fact:
+        ip_list: "{{ inventory_ips.split(',') }}"
+
+# 客户端主动关闭gpfs服务
+- hosts: select_hosts
+  gather_facts: true
+  remote_user: ansibleuser
+  become: yes
+  tasks:
+    - name: 关闭gpfs客户端
+      shell: "/usr/lpp/mmfs/bin/mmshutdown"
+      loop: "{{ hostvars['localhost']['ip_list'] }}"
+      when: item != ''
+
+# 卸载 gpfs 客户端
+- hosts: gpfs-ssd
+  gather_facts: false
+  remote_user: ansibleuser
+  become: yes
+  tasks:
+    - name: 卸载客户端
+      shell: |
+        /usr/lpp/mmfs/bin/mmdelnode -N {{ hostvars[item].ansible_hostname }}
+      loop: "{{ hostvars['localhost']['ip_list'] }}"
+      when: item != ''
+
+# 本地执行任务，获取执行playbook时传递过来的ip_list，然后清理要卸载的客户端hosts
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: 执行本地任务，删除所有客户端要卸载的客户端hosts解析
+      command: /usr/bin/python3 /tmp/automation_jobs/scripts/post_gpfs_client.py uninstall "{{ item }}"
+      loop: "{{ ip_list }}"
+      when: item != ''

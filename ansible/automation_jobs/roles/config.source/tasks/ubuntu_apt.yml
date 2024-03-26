@@ -1,0 +1,20 @@
+---
+- name: 拷贝原有源文件
+  copy:
+    src: "/etc/apt/sources.list"
+    dest: "/etc/apt/sources.list_bk"
+    remote_src: yes
+
+- name: 写入新源内容
+  template:
+    src: apt_sources.j2
+    dest: '/etc/apt/sources.list'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 执行apt-get update
+  apt:
+    update_cache: yes
+  failed_when: false
+  changed_when: false

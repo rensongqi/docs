@@ -1,8 +1,8 @@
 package main
 
 import (
+	"codes/sort/swap"
 	"math/rand"
-	swap2 "study_docs/data_structure/codes/sort/swap"
 	"time"
 )
 
@@ -23,7 +23,7 @@ func quick(nums []int, l, r int) {
 		source := rand.NewSource(time.Now().UnixNano())
 		ri := rand.New(source)
 		// 在r-l+1 的范围内生成一个随机数，跟数组最后一位进行交换，保证时间复杂度在O(N*LogN)
-		swap2.Swap(nums, l+ri.Intn(r-l+1), r)
+		swap.Swap(nums, l+ri.Intn(r-l+1), r)
 		// 生成一个左右边界的下标数组，数组的长度为2， 分别代表<>区域的边界index
 		p := partition(nums, l, r)
 		quick(nums, l, p[0]-1) // <区域递归
@@ -37,15 +37,15 @@ func partition(nums []int, l, r int) []int {
 	for l < more { // l表示当前数的位置，arr[r] -> 划分值
 		if nums[l] < nums[r] { // 当前数 < 划分数
 			le++
-			swap2.Swap(nums, le, l)
+			swap.Swap(nums, le, l)
 			l++
 		} else if nums[l] > nums[r] { // 当前数 > 划分数
 			more--
-			swap2.Swap(nums, more, l)
+			swap.Swap(nums, more, l)
 		} else { // 当前数等于划分数，l++
 			l++
 		}
 	}
-	swap2.Swap(nums, more, r)
+	swap.Swap(nums, more, r)
 	return []int{le + 1, more}
 }

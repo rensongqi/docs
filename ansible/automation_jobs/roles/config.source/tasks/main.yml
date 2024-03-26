@@ -1,0 +1,7 @@
+---
+#- include_tasks: ubuntu_apt.yml
+- include_tasks: ubuntu_with_different_apt.yml
+  when: machine_type == 'Ubuntu'
+
+- include_tasks: centos_yum.yml
+  when: machine_type == 'CentOS'

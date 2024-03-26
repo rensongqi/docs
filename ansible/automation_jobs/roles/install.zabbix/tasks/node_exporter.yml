@@ -1,0 +1,42 @@
+---
+- set_fact:
+    nodeexporter_bundle_name: node_exporter-1.4.0.linux-amd64.tar.gz
+    nodeexporter_bundle_path: /home/ansibleuser/
+    nodeexporter_bundle_url: http://apt.rsq.cn/bundle/node_exporter-1.4.0.linux-amd64.tar.gz
+
+- name: 获取nodeexporter 的包
+  get_url:
+    url: "{{ nodeexporter_bundle_url }}"
+    dest: "{{ nodeexporter_bundle_path }}"
+
+- name: 解压nodeexporter 的包
+  unarchive:
+    src: "{{ nodeexporter_bundle_path }}{{ nodeexporter_bundle_name }}"
+    dest: "{{ nodeexporter_bundle_path }}"
+    remote_src: yes
+
+
+- name: 修改nodeexporter 权限
+  file:
+    path: "{{ nodeexporter_bundle_path }}node_exporter-1.4.0.linux-amd64/node_exporter"
+    mode: 0777
+
+- name: 将nodeexporter 移动
+  shell: mv node_exporter /usr/local/
+  args:
+    chdir: "{{ nodeexporter_bundle_path }}node_exporter-1.4.0.linux-amd64"
+
+- name: 配置nodeexporter 服务
+  template:
+    src: node-exporter.j2
+    dest: '/etc/systemd/system/node-exporter.service'
+
+- name: 进行 daemon-reload
+  systemd:
+    daemon_reload: yes
+
+- name: 重启并enable nodeexporter
+  service:
+    name: node-exporter
+    state: restarted
+    enabled: yes

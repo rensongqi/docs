@@ -1,0 +1,16 @@
+---
+- name: yum安装ntp所需
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - "ntp"
+    - "ntpdate"
+
+- include_tasks: config_ntp.yml
+
+- name: 重载配置并重启ntp centos
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+    name: ntpd

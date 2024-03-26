@@ -1,0 +1,18 @@
+---
+
+- name: rpm添加zabbix本地源
+  template:
+    src: zabbix_yum.j2
+    dest: '/etc/yum.repos.d/zabbix.repo'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 安装zabbix agent
+  yum:
+    name:
+      - pcre2
+      - zabbix-agent
+    update_cache: yes
+
+- include_tasks: config_zabbix.yml

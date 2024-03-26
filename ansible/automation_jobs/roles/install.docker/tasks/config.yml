@@ -1,0 +1,12 @@
+---
+- name: create docker file
+  file:
+    path: /etc/docker
+    state: directory
+    mode: '0755'
+
+- name: 启动并开机启动docker服务
+  systemd:
+    name: docker
+    state: started
+    enabled: yes

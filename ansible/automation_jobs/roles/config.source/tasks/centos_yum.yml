@@ -1,0 +1,28 @@
+---
+- name: 拷贝原有源文件
+  copy:
+    src: "/etc/yum.repos.d/CentOS-Base.repo"
+    dest: "/etc/yum.repos.d/CentOS-Base.repo-bak"
+    remote_src: yes
+
+- name: 写入yum新源内容
+  template:
+    src: yum_source.j2
+    dest: '/etc/yum.repos.d/CentOS-Base.repo'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 写入epel新源内容
+  template:
+    src: yum_source.j2
+    dest: '/etc/yum.repos.d/epel.repo'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 执行yum update
+  yum:
+    update_cache: yes
+  failed_when: false
+  changed_when: false

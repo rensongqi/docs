@@ -1,0 +1,54 @@
+# 本地执行python脚本，从gpfs server端获取现有客户端数据
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: 执行本地任务，获取所有目前已存在的客户端dns解析
+      command: /usr/bin/python3 /tmp/automation_jobs/scripts/get_gpfs_clients.py hosts
+      register: gpfs_clients_dns
+
+# 给新客户端配置hosts，以及安装gpfs相关依赖和包文件
+- hosts: select_hosts
+  vars:
+    gpfs_clients_dns: "{{ hostvars['localhost']['gpfs_clients_dns'].stdout }}"
+  gather_facts: true
+  remote_user: ansibleuser
+  become: yes
+  tasks:
+    - include_role:
+        name: gpfs_modify_hosts
+    - include_role:
+        name: gpfs_install_packages
+
+# 本地执行任务，获取执行playbook时传递过来的ip_list，并注册到变量中，供各个playbook调用
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: test
+      debug:
+        msg: "{{ inventory_ips }}"
+    - name: 处理传递过来的ip地址
+      set_fact:
+        ip_list: "{{ inventory_ips.split(',') }}"
+    - name: 执行本地任务，对现有所有客户端追加新hosts
+      command: /usr/bin/python3 /tmp/automation_jobs/scripts/post_gpfs_client.py client "{{ hostvars[item]['new_dns'].stdout }}"
+      loop: "{{ ip_list }}"
+      when: item != ''
+
+# gpfs server端添加新的客户端节点，会自动判断有无IB网卡
+- hosts: gpfs-ssd
+  gather_facts: false
+  remote_user: ansibleuser
+  become: yes
+  tasks:
+    - include_role:
+        name: gpfs_add_node
+
+# 新的客户端启动gpfs，默认会把除了ces之外的文件系统都挂载到本地
+- hosts: select_hosts
+  gather_facts: false
+  remote_user: ansibleuser
+  become: yes
+  tasks:
+    - name: 启动gpfs客户端，挂载gpfs文件系统
+      shell: |
+        /usr/lpp/mmfs/bin/mmstartup && sleep 10s && df -h | egrep 'upload|deepdata|AIStudiodata'

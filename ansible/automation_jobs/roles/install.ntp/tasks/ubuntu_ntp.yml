@@ -1,0 +1,16 @@
+---
+- name: apt安装ntp所需
+  apt:
+    name: "{{ item }}"
+  with_items:
+    - "ntp"
+    - "ntpdate"
+
+- include_tasks: config_ntp.yml
+
+- name: 重载配置并重启ntp ubuntu
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+    name: ntp

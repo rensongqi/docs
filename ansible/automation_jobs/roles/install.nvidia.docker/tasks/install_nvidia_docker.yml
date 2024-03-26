@@ -1,0 +1,35 @@
+---
+- name: 写入新源内容
+  template:
+    src: nvidia_sources.j2
+    dest: '/etc/apt/sources.list.d/nvidia-docker.list'
+    owner: root
+    group: root
+    mode: 0644
+  become: True
+
+- shell: curl -s -L http://nvidia-docker.rsq.cn/nvidia-docker/gpgkey | apt-key add -
+
+- name: 安装nvidia docker
+  apt:
+    name: nvidia-docker2
+    update_cache: yes
+
+- name: 修改daemon.json
+  template:
+    src: daemon.j2
+    dest: '/etc/docker/daemon.json'
+    owner: root
+    group: root
+    mode: 0644
+  become: True
+
+- name:
+  shell: systemctl daemon-reload
+
+
+- name: 重载配置并重启docker
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: docker

@@ -1,0 +1,6 @@
+---
+- include_tasks: ubuntu_docker.yml
+  when: machine_type == 'Ubuntu'
+
+- include_tasks: centos_docker.yml
+  when: machine_type == 'CentOS'

@@ -1,0 +1,42 @@
+- name: 获取当前主机名
+  set_fact:
+    current_hostname: "{{ ansible_hostname }}"
+
+- name: 获取主机IPv4信息
+  set_fact:
+    ip_address_info: "{{ ansible_default_ipv4.address }}"
+
+- name: 提取倒数第二位
+  set_fact:
+    second_last_digit: "{{ ip_address_info.split('.')[-2] }}"
+
+- name: 提取最后一位
+  set_fact:
+    last_digit: "{{ ip_address_info.split('.')[-1] }}"
+
+- name: 获取显卡型号
+  command: nvidia-smi --query-gpu=name --format=csv,noheader,nounits
+  register: gpu_info
+
+- name: 提取并去重显卡型号
+  set_fact:
+    gpu_model: "{{ gpu_info.stdout_lines | map('regex_replace', '.*?(\\d+).*', 'A\\1') | unique | join(',') }}"
+
+- name: 根据不同显卡型号进行处理
+  set_fact:
+    gpu_model_processed: "{{ gpu_model | regex_replace('A3090', '3090') | regex_replace('A4090', '4090') }}"
+
+- name: 获取显卡数量
+  set_fact:
+    gpu_count: "{{ gpu_info.stdout_lines | length }}"
+
+- name: 打印结果
+  debug:
+    msg: "train-{{ gpu_model_processed }}x{{ gpu_count }}-amd-{{ second_last_digit }}-{{ last_digit }}"
+
+- name: 检查主机名是否匹配
+  assert:
+    that:
+      - "'train-{{ gpu_model_processed }}x{{ gpu_count }}-amd-{{ second_last_digit }}-{{ last_digit }}' == current_hostname"
+    fail_msg: "主机名不匹配，请检查配置"
+    success_msg: "主机名匹配成功"

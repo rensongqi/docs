@@ -1,0 +1,33 @@
+---
+- name: 删除现有时区
+  file:
+    path: /etc/localtime
+    state: absent
+
+- name: 软连接上海时区
+  file:
+    path: /etc/localtime
+    src: /usr/share/zoneinfo/Asia/Shanghai
+    state: link
+    force: yes
+
+- name: 修改ntp配置
+  blockinfile:
+    path: /etc/ntp.conf
+    state: "present"
+    block: |
+      restrict 172.16.100.0 mask 255.255.255.0 nomodify notrap
+      server 172.16.100.11 iburst
+      server 172.16.100.12 iburst
+
+- name: cron配置同步时间
+  cron:
+    name: ntp sync
+    minute: 0
+    hour: 3
+    job: "ntpdate 172.16.100.11"
+
+- name: 配置时间同步定时任务
+  lineinfile:
+    path: "/etc/crontab"
+    line: "*/5 * * * * root /usr/sbin/ntpdate 172.16.100.11"

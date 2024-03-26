@@ -1,0 +1,27 @@
+- name: 修改为内部zabbix源
+  template:
+    src: zabbix_ubuntu.j2
+    dest: '/etc/apt/sources.list.d/zabbix.list'
+    owner: root
+    group: root
+    mode: 0644
+
+
+- name: 安装zabbix
+  apt:
+    name: zabbix-agent
+
+- include_tasks: config_zabbix.yml
+
+
+- name: 删除zabbix源 (不删除会导致其他报错)
+  file:
+    path: /etc/apt/sources.list.d/zabbix.list
+    state: absent
+
+- name: 获取主机IP地址
+  set_fact:
+    host_ip: "{{ ansible_default_ipv4.address }}"
+
+- name: install node_exporter
+  include_tasks: "{{ 'node_exporter.yml' if host_ip.startswith('172.16.1.') or host_ip.startswith('172.16.103.') else 'print_not_satisfied.yml' }}"

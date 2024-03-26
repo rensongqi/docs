@@ -1,0 +1,17 @@
+{
+    "insecure-registries": ["http://harbor.rsq.cn"],
+    "default-runtime": "nvidia",
+    "default-address-pools": [{"base": "172.18.0.0/16", "size": 24}],
+    "log-driver": "json-file",
+    "log-opts": {
+      "max-size": "100m"
+    },
+    "storage-driver": "overlay2",
+    "runtimes": {
+        "nvidia": {
+            "path": "nvidia-container-runtime",
+            "runtimeArgs": []
+        }
+    }
+}
+

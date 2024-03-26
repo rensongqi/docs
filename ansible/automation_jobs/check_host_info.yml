@@ -1,0 +1,106 @@
+---
+- hosts: select_hosts
+  gather_facts: no
+  vars:
+    all_hosts_info: []
+  tasks:
+    - name: Check if host is reachable
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 22
+        timeout: 1
+      register: reachable
+      ignore_errors: true
+    - name: Debug reachable
+      debug:
+        msg: "{{reachable.failed}}"
+    - name: Get system info if host is reachable
+      block:
+        - name: Get hostname
+          shell: hostname
+          register: hostname
+        - name: Get OS version
+          shell: |
+            cat /etc/os-release | grep PRETTY_NAME | awk -F'"' '{print $2}' | grep -i 'ubuntu' >> /dev/null  && echo 'ubuntu' || echo 'centos'
+          register: os_version
+        - name: Get CPU model
+          shell: |
+            cat /proc/cpuinfo | grep 'model name' | uniq | awk -F: '{print $NF}'
+          register: cpu_model
+        - name: Get CPU cores
+          command: nproc
+          register: cpu_cores
+
+        - name: Get CPU utilization
+          shell: |
+            vmstat 1 2 | tail -n 1 | awk '{print 100 - $15"%"}'
+          register: cpu_utilization
+
+        - name: Get total memory
+          shell: |
+            free -h | awk '/Mem/ {print $2}' | awk -FG '{print $1}'
+          register: memory_total
+
+        - name: Get used memory
+          shell: |
+            free -h | awk '/Mem/ {print $3}' | awk -FG '{print $1}'
+          register: memory_used
+
+        - name: Get GPU model
+          shell: |
+            nvidia-smi --query-gpu=name --format=csv,noheader,nounits | uniq
+          register: gpu_model
+          ignore_errors: true
+
+        - name: Get GPU count
+          shell: |
+            nvidia-smi --query-gpu=name --format=csv,noheader,nounits | wc -l
+          register: gpu_count
+          ignore_errors: true
+
+        - name: Add system info to all_hosts_info
+          set_fact:
+            all_hosts_info: "{{ all_hosts_info + [system_info] }}"
+          vars:
+            system_info:
+              ip_address: "{{ inventory_hostname }}"
+              cpu_usage: "{{ cpu_utilization.stdout }}"
+              cpu_type: "{{ cpu_model.stdout }}"
+              os: "{{ os_version.stdout }}"
+              hostname: "{{ hostname.stdout }}"
+              memory: "{{ memory_total.stdout }}"
+              memory_usage: "{{ memory_used.stdout }}"
+              gpu_type: "{{ gpu_model.stdout }}"
+              gpu_count: "{{ gpu_count.stdout }}"
+      when: reachable is not failed
+
+    - name: debug all_hosts_info
+      debug:
+        msg: "{{all_hosts_info}}"
+
+- hosts: localhost
+  gather_facts: false
+  vars:
+    all_hosts_info: []
+  tasks:
+    - name: 处理传递过来的ip地址
+      set_fact:
+        ip_list: "{{ inventory_ips.split(',') }}"
+    - name: 把所有数据汇总到数组中
+      set_fact:
+        all_hosts_info: "{{ all_hosts_info + hostvars[item]['all_hosts_info'] }}"
+      loop: "{{ ip_list }}"
+      when: item != '' and hostvars[item]['all_hosts_info'] is defined and hostvars[item]['all_hosts_info'] | length > 0
+    - name: 向综合运维平台上报数据
+      uri:
+        url: "https://devops.rsq.cn/api/public/assets/report"
+#        url: "http://127.0.0.1:8866/api/public/assets/report"
+        method: POST
+        body_format: json
+        body: "{{ all_hosts_info }}"
+        headers:
+          Content-Type: "application/json"
+      register: result
+    - name: debug result
+      debug:
+        msg: "{{ result }}"

@@ -1,0 +1,16 @@
+- include_tasks: config.yml
+
+- name: 修改limit限制
+  shell:
+    sed -i 's/4096/unlimited/g' /etc/security/limits.d/20-nproc.conf
+
+- name: 关闭防火墙
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: 关闭selinux
+  shell: |
+    sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+    setenforce 0

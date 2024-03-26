@@ -1,0 +1,22 @@
+- hosts: select_hosts
+  name: Get OS Information
+  gather_facts: true
+  tasks:
+    - name: Check OS Distribution
+      set_fact:
+        os_distribution: "{{ ansible_distribution }}"
+      when: "'{{ ansible_distribution }}' in ['Ubuntu', 'CentOS']"
+
+    - name: Display OS Information
+      debug:
+        var: os_distribution
+
+    - name: Check for NVIDIA devices
+      shell: ls /proc/driver/nvidia/gpus/
+      register: nvidia_check
+      ignore_errors: yes
+
+    - name: Print NVIDIA devices info
+      debug:
+        var: nvidia_check.stdout
+      when: nvidia_check.rc == 0  # 只有当命令执行成功（即 rc 为 0）时才输出 NVIDIA 设备信息

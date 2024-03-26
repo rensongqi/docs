@@ -1,0 +1,22 @@
+- name: 1. 新客户端 - 初始化gpfs server hosts
+  template: src=hosts.j2 dest=/etc/hosts
+
+- name: 2. 新客户端 - 添加新clinet hosts
+  shell: |
+    echo "{{ gpfs_clients_dns }}" >> /etc/hosts
+
+- name: 3. 新客户端 - 获取主机名
+  shell: hostname
+  register: new_hostname
+
+- name: 4. 注册新客户端dns解析的变量
+  shell: "echo {{ inventory_hostname }} {{ new_hostname.stdout }}.inspur.com {{ new_hostname.stdout }}"
+  register: new_dns
+
+- name: 5. 获取新客户端的dns解析
+  shell: |
+    echo "{{ new_dns.stdout }}" >> /etc/hosts
+
+- name: debug localhost
+  debug:
+    msg: "{{ gpfs_clients_dns }}"

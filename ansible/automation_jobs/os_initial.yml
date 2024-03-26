@@ -1,0 +1,27 @@
+- hosts: select_hosts
+  gather_facts: true
+  become: yes
+  tasks:
+    - name: Check for NVIDIA devices
+      shell: ls /proc/driver/nvidia/gpus/
+      register: nvidia_check
+      ignore_errors: yes
+    - name: Check OS Distribution
+      set_fact:
+        os_distribution: "{{ ansible_distribution }}"
+      when: "'{{ ansible_distribution }}' in ['Ubuntu', 'CentOS']"
+    - include_role:
+        name: '{{ roleinputvar }}'
+      vars:
+        machine_type: "{{ os_distribution }}"
+      loop:
+        - config.user
+        - config.source
+        - install.docker
+        - install.ntp
+        - system.optimization
+        - install.zabbix
+        - install.nvidia.docker
+        - install.check_host
+      loop_control:
+        loop_var: roleinputvar

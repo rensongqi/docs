@@ -1,0 +1,6 @@
+---
+- include_tasks: ubuntu_ntp.yml
+  when: machine_type == 'Ubuntu'
+
+- include_tasks: centos_ntp.yml
+  when: machine_type == 'CentOS'

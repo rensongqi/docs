@@ -1,0 +1,47 @@
+---
+- name: 创建guest guestadmin用户
+  user:
+    name: "{{ item.user }}"
+    password: "{{ item.pass }}"
+    shell: /bin/bash
+    state: present
+  loop:
+    - {user: guest, pass: "{{ 'xxxxxxxx' | password_hash('sha512')}}", home: '/home/guest'}
+    - {user: guestadmin, pass: "{{ 'xxxxxxxx' | password_hash('sha512')}}", home: '/home/guestadmin'}
+
+- name: 解密以防后续修改文件失败
+  block:
+    - name: 解锁sudoers
+      file:
+        path: /etc/sudoers
+        attr: -i
+
+    - name: 解锁sshd_config
+      file:
+        path: /etc/ssh/sshd_config
+        attr: -i
+
+- name: 删除之前的sudo权限配置
+  lineinfile:
+    path: /etc/sudoers
+    regexp: "{{ item }}"
+    state: absent
+  loop:
+    - "guest"
+    - "PasswordAuthentication"
+    - "PubkeyAuthentication "
+
+# 添加了禁用
+- name: 添加sudo权限
+  blockinfile:
+    path: /etc/sudoers
+    state: "present"
+    block: |
+      guestadmin    ALL=(ALL:ALL) ALL
+      guest         ALL=(ALL)     ALL,!/bin/su,!/usr/bin/chattr
+      
+- include_tasks: create_pub_key.yml
+
+- include_tasks: change_login_rules.yml
+
+- include_tasks: chattr_file.yml

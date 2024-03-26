@@ -1,0 +1,10 @@
+- include_tasks: config.yml
+
+- name: 修改limit限制
+  shell: |
+    echo "* - nofile 102400" >> /etc/security/limits.d/nofile.conf
+    echo "root - nofile 102400" >> /etc/security/limits.d/nofile.conf
+
+- name: 关闭防火墙
+  ufw:
+    state: disabled

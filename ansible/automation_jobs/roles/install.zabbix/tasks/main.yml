@@ -1,0 +1,7 @@
+---
+#- include_tasks: ubuntu_zabbix.yml
+- include_tasks: ubuntu_zabbix.yml 
+  when: machine_type == 'Ubuntu'
+
+- include_tasks: centos_zabbix.yml
+  when: machine_type == 'CentOS'

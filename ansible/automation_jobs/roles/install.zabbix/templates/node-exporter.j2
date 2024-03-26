@@ -1,0 +1,8 @@
+[Unit]
+Description=Prometheus Node Exporter
+After=network.target
+[Service]
+ExecStart=/usr/local/node_exporter
+User=root
+[Install]
+WantedBy=multi-user.target

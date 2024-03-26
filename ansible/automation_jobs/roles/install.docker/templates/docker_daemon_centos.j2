@@ -1,0 +1,9 @@
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "default-address-pools": [{"base": "172.18.0.0/16", "size": 24}],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "insecure-registries": ["harbor.rsq.cn"]
+}

@@ -1,0 +1,21 @@
+---
+
+- name: 删除之前的ssh配置
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item }}"
+    state: absent
+  loop:
+    - "PermitRootLogin"
+    - "PasswordAuthentication"
+    - "PubkeyAuthentication "
+
+
+- name: 添加新的ssh配置
+  blockinfile:
+    path: /etc/ssh/sshd_config
+    state: "present"
+    block: |
+      PermitRootLogin no
+      PasswordAuthentication no
+      PubkeyAuthentication yes

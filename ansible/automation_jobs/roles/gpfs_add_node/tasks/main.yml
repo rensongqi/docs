@@ -1,0 +1,16 @@
+---
+- name: gpfs server节点添加node 有IB网卡
+  shell: |
+    /usr/lpp/mmfs/bin/mmaddnode -N {{ hostvars[item]['new_hostname'].stdout }}.inspur.com
+    /usr/lpp/mmfs/bin/mmchlicense client --accept -N {{ hostvars[item]['new_hostname'].stdout }}.inspur.com
+    /usr/lpp/mmfs/bin/mmchconfig verbsPorts='{{ hostvars[item]['ib_port_name'].stdout }}' -N {{ hostvars[item]['new_hostname'].stdout }}.inspur.com
+  loop: "{{ hostvars['localhost']['ip_list'] }}"
+  when: (item) != '' and (hostvars[item]['ib_port_name'].stdout != '')
+
+- name: gpfs server节点添加node 无IB网卡
+  shell: |
+    /usr/lpp/mmfs/bin/mmaddnode -N {{ hostvars[item]['new_hostname'].stdout }}.inspur.com
+    /usr/lpp/mmfs/bin/mmchlicense client --accept -N {{ hostvars[item]['new_hostname'].stdout }}.inspur.com
+  loop: "{{ hostvars['localhost']['ip_list'] }}"
+  when: (item) != '' and (hostvars[item]['ib_port_name'].stdout == '')
+

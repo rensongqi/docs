@@ -1,6 +1,6 @@
 package main
 
-import swap2 "study_docs/data_structure/codes/sort/swap"
+import "codes/sort/swap"
 
 // HeapSort 堆排序时间复杂度：N*Log2N，空间复杂度：1
 // 逻辑：堆是一种特殊的完全二叉树，它的基本思想是通过构建大根堆和小根堆，然后不断地将堆顶元素与堆的最后一个元素交换，
@@ -20,11 +20,11 @@ func HeapSort(nums []int) {
 	//}
 
 	heapSize := len(nums) - 1
-	swap2.Swap(nums, 0, heapSize)
+	swap.Swap(nums, 0, heapSize)
 	for heapSize > 0 { // O(N)
 		heapify(nums, 0, heapSize) // O(LogN) 为了成最大堆，找到堆中最大的值
 		heapSize--
-		swap2.Swap(nums, 0, heapSize) // O(1)
+		swap.Swap(nums, 0, heapSize) // O(1)
 	}
 }
 
@@ -36,7 +36,7 @@ func HeapSort(nums []int) {
 // 某个数现在处于index位置，判断当前位置是否能往上继续移动
 func heapInsert(nums []int, index int) {
 	for nums[index] > nums[(index-1)/2] {
-		swap2.Swap(nums, index, (index-1)/2)
+		swap.Swap(nums, index, (index-1)/2)
 		index = (index - 1) / 2
 	}
 }
@@ -59,7 +59,7 @@ func heapify(nums []int, index, heapSize int) {
 			break
 		}
 		// largest和index父节点交换，继续往下走
-		swap2.Swap(nums, largest, index)
+		swap.Swap(nums, largest, index)
 		// 父节点变为最大的index
 		index = largest
 		// 新的左孩子等于从新的父节点重新赋值
