@@ -1,5 +1,13 @@
-# 知识总结
+# About
 
 
+Record some problems encountered in work or study and summarize the relevant knowledge points for review.
 
-记录一些工作或学习上遇到的问题及相关知识点的总结以便回顾
+- linux
+- k8s
+- go
+- data structure
+- cicd
+- ansible
+- tools
+- windows
