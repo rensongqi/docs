@@ -1,12 +1,3 @@
-## 1 稀疏数组
-
-当一个数组中的大部分元素为[0]，或者其它相同的值时，可以使用稀疏数组来保存该数组
-
-处理方法：
-（1）记录数组一共有几行几列， 有多少个不同的值
-（2）把具有不同值的元素的行列及值记录在一个小规模的数组中，从而缩小程序的规模
-
-```go
 package main
 
 import (
@@ -21,7 +12,7 @@ import (
 type ValNode struct {
 	raw int
 	col int
-	va int
+	va  int
 }
 
 func main() {
@@ -31,7 +22,7 @@ func main() {
 	fmt.Println("原始的数组：")
 	for _, v := range sparAry {
 		for _, v2 := range v {
-				fmt.Printf("%d \t", v2)
+			fmt.Printf("%d \t", v2)
 		}
 		fmt.Println()
 	}
@@ -40,16 +31,16 @@ func main() {
 	varNode1 := ValNode{
 		raw: 11,
 		col: 11,
-		va: 0,
+		va:  0,
 	}
 	sliceAry = append(sliceAry, varNode1)
 	for i, v := range sparAry {
-		for j, v2 := range v{
+		for j, v2 := range v {
 			if v2 != 0 {
 				varNode2 := ValNode{
 					raw: i,
 					col: j,
-					va: v2,
+					va:  v2,
 				}
 				sliceAry = append(sliceAry, varNode2)
 			}
@@ -63,7 +54,7 @@ func main() {
 
 	// 写入文件
 	filePath := "chess.txt"
-	file, err := os.OpenFile(filePath, os.O_CREATE | os.O_WRONLY, 0666)
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Println(err)
 	}
@@ -84,7 +75,6 @@ func main() {
 	fmt.Println("-----------从文件中的全部读取的数据----------")
 	fmt.Printf("%v", string(read))
 
-
 	fmt.Println("-----------从文件中的分行读取的数据----------")
 	file1, err := os.OpenFile(filePath, os.O_RDONLY, 0666)
 	if err != nil {
@@ -93,6 +83,7 @@ func main() {
 	defer file1.Close()
 
 	for {
+		reader := bufio.NewReader(file1)
 		str, err := reader.ReadString('\n')
 		if err == io.EOF {
 			return
@@ -100,4 +91,3 @@ func main() {
 		fmt.Print(str)
 	}
 }
-```

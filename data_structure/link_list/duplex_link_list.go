@@ -2,17 +2,17 @@ package main
 
 import "fmt"
 
-type HeroNode struct {
+type DuplexHeroNode struct {
 	no       int
 	name     string
 	nickname string
-	pre      *HeroNode // 指向前一个节点
-	next     *HeroNode // 这个表示指向下一个节点
+	pre      *DuplexHeroNode // 指向前一个节点
+	next     *DuplexHeroNode // 这个表示指向下一个节点
 }
 
-// InsertHeroNode 给双向链表插入一个节点
+// InsertDuplexHeroNode 给双向链表插入一个节点
 // 在双链表的最后加入
-func InsertHeroNode(head *HeroNode, newHeroNode *HeroNode) {
+func InsertDuplexHeroNode(head *DuplexHeroNode, newHeroNode *DuplexHeroNode) {
 	// 1、先找到该链表的最后这个节点
 	// 2、创建一个辅助节点
 	temp := head
@@ -28,8 +28,8 @@ func InsertHeroNode(head *HeroNode, newHeroNode *HeroNode) {
 	newHeroNode.pre = temp
 }
 
-// DelHeroNode 删除链表节点
-func DelHeroNode(head *HeroNode, id int) {
+// DelDuplexHeroNode 删除链表节点
+func DelDuplexHeroNode(head *DuplexHeroNode, id int) {
 	temp := head
 	flag := true
 	// 让插入的节点no跟temp的下一个加点的no比较
@@ -57,7 +57,7 @@ func DelHeroNode(head *HeroNode, id int) {
 }
 
 // InsertSortHeroNode 根据no的编号从小到大插入数据
-func InsertSortHeroNode(head *HeroNode, newHeroNode *HeroNode) {
+func InsertDuplexSortHeroNode(head *DuplexHeroNode, newHeroNode *DuplexHeroNode) {
 	// 1、找到该链表适当的节点
 	// 2、创建一个辅助节点
 	temp := head
@@ -91,7 +91,7 @@ func InsertSortHeroNode(head *HeroNode, newHeroNode *HeroNode) {
 }
 
 // ListHeroNode 按顺序显示链表的所有节点信息
-func ListHeroNode(head *HeroNode) {
+func ListDuplexHeroNode(head *DuplexHeroNode) {
 	// 创建一个辅助节点
 	temp := head
 
@@ -112,8 +112,8 @@ func ListHeroNode(head *HeroNode) {
 	fmt.Println()
 }
 
-// ReverseListHeroNode 逆序显示链表的所有节点信息
-func ReverseListHeroNode(head *HeroNode) {
+// ReverseDuplexListHeroNode 逆序显示链表的所有节点信息
+func ReverseDuplexListHeroNode(head *DuplexHeroNode) {
 	// 1、创建一个辅助节点
 	temp := head
 
@@ -145,33 +145,33 @@ func ReverseListHeroNode(head *HeroNode) {
 
 func main() {
 	// 1 先创建一个空的头结点
-	head := &HeroNode{}
+	head := &DuplexHeroNode{}
 
 	// 2 创建新的HeroNode
-	hero1 := &HeroNode{
+	hero1 := &DuplexHeroNode{
 		no:       1,
 		name:     "宋江",
 		nickname: "及时雨",
 	}
-	hero2 := &HeroNode{
+	hero2 := &DuplexHeroNode{
 		no:       2,
 		name:     "卢俊义",
 		nickname: "玉麒麟",
 	}
-	hero3 := &HeroNode{
+	hero3 := &DuplexHeroNode{
 		no:       3,
 		name:     "林冲",
 		nickname: "豹子头",
 	}
-	InsertSortHeroNode(head, hero3)
-	InsertSortHeroNode(head, hero1)
-	InsertSortHeroNode(head, hero2)
+	InsertDuplexSortHeroNode(head, hero3)
+	InsertDuplexSortHeroNode(head, hero1)
+	InsertDuplexSortHeroNode(head, hero2)
 
-	//DelHeroNode(head, 2)
+	//DelDuplexHeroNode(head, 2)
 
 	fmt.Println("顺序打印：")
-	ListHeroNode(head)
+	ListDuplexHeroNode(head)
 	fmt.Println("逆序打印：")
-	ReverseListHeroNode(head)
+	ReverseDuplexListHeroNode(head)
 
 }

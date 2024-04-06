@@ -2,16 +2,17 @@ package main
 
 import "fmt"
 
-type HeroNode struct {
+type SingleHeroNode struct {
 	no       int
 	name     string
 	nickname string
-	next     *HeroNode // 这个表示指向下一个节点
+	pre      *SingleHeroNode // 指向前一个节点
+	next     *SingleHeroNode // 这个表示指向下一个节点
 }
 
-// InsertHeroNode 给链表插入一个节点
+// InsertSingleHeroNode 给链表插入一个节点
 // 在单链表的最后加入
-func InsertHeroNode(head *HeroNode, newHeroNode *HeroNode) {
+func InsertSingleHeroNode(head *SingleHeroNode, newHeroNode *SingleHeroNode) {
 	// 1、先找到该链表的最后这个节点
 	// 2、创建一个辅助节点
 	temp := head
@@ -26,7 +27,7 @@ func InsertHeroNode(head *HeroNode, newHeroNode *HeroNode) {
 	temp.next = newHeroNode
 }
 
-func DelHeroNode(head *HeroNode, id int) {
+func DelSingleHeroNode(head *SingleHeroNode, id int) {
 	temp := head
 	flag := true
 	// 让插入的节点no跟temp的下一个加点的no比较
@@ -50,8 +51,8 @@ func DelHeroNode(head *HeroNode, id int) {
 	fmt.Println()
 }
 
-// InsertSortHeroNode 根据no的编号从小到大插入数据
-func InsertSortHeroNode(head *HeroNode, newHeroNode *HeroNode) {
+// InsertSingleSortHeroNode 根据no的编号从小到大插入数据
+func InsertSingleSortHeroNode(head *SingleHeroNode, newHeroNode *SingleHeroNode) {
 	// 1、找到该链表适当的节点
 	// 2、创建一个辅助节点
 	temp := head
@@ -80,8 +81,8 @@ func InsertSortHeroNode(head *HeroNode, newHeroNode *HeroNode) {
 	}
 }
 
-// ListHeroNode 显示链表的所有节点信息
-func ListHeroNode(head *HeroNode) {
+// ListSingleHeroNode 显示链表的所有节点信息
+func ListSingleHeroNode(head *SingleHeroNode) {
 	// 创建一个辅助节点
 	temp := head
 
@@ -104,30 +105,30 @@ func ListHeroNode(head *HeroNode) {
 
 func main() {
 	// 1 先创建一个空的头结点
-	head := &HeroNode{}
+	head := &SingleHeroNode{}
 
 	// 2 创建新的HeroNode
-	hero1 := &HeroNode{
+	hero1 := &SingleHeroNode{
 		no:       1,
 		name:     "宋江",
 		nickname: "及时雨",
 	}
-	hero2 := &HeroNode{
+	hero2 := &SingleHeroNode{
 		no:       2,
 		name:     "卢俊义",
 		nickname: "玉麒麟",
 	}
-	hero3 := &HeroNode{
+	hero3 := &SingleHeroNode{
 		no:       3,
 		name:     "林冲",
 		nickname: "豹子头",
 	}
-	InsertSortHeroNode(head, hero3)
-	InsertSortHeroNode(head, hero1)
-	InsertSortHeroNode(head, hero2)
-	ListHeroNode(head)
+	InsertSingleSortHeroNode(head, hero3)
+	InsertSingleSortHeroNode(head, hero1)
+	InsertSingleSortHeroNode(head, hero2)
+	ListSingleHeroNode(head)
 
-	DelHeroNode(head, 2)
+	DelSingleHeroNode(head, 2)
 
-	ListHeroNode(head)
+	ListSingleHeroNode(head)
 }

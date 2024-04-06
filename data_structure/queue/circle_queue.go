@@ -1,3 +1,14 @@
+/*
+用数组实现环形队列，此环形队列的值为`len(array) - 1`
+通过把rear取模运算，使之回到初始状态
+队列满：`(rear + 1) % maxSize == front`
+队列空：`rear == frant`
+初始化时：`rear = 0 && front == 0`
+统计队列有多少元素：`(rear + maxSize - front) % maxSize`
+
+maxSize == 5 && 指针含头不含尾
+环形队列
+*/
 package main
 
 import (
@@ -13,7 +24,7 @@ type circleQueue struct {
 	tail    int
 }
 
-// 入队列
+// Push 入队列
 func (c *circleQueue) Push(val int) (err error) {
 	if c.IsFull() {
 		return errors.New("queue full")
@@ -24,7 +35,7 @@ func (c *circleQueue) Push(val int) (err error) {
 	return
 }
 
-// 出队列
+// Pop 出队列
 func (c *circleQueue) Pop() (val int, err error) {
 	if c.IsEmpty() {
 		return 0, errors.New("queue full")
@@ -35,7 +46,7 @@ func (c *circleQueue) Pop() (val int, err error) {
 	return
 }
 
-// 显示队列
+// ShowQueue 显示队列
 func (c *circleQueue) ShowQueue() {
 	// 取出当前队列有多少个元素
 	fmt.Println("环形队列如下：")
@@ -51,12 +62,12 @@ func (c *circleQueue) ShowQueue() {
 	fmt.Println()
 }
 
-// 判断环形队列是否为满
+// IsFull 判断环形队列是否为满
 func (c *circleQueue) IsFull() bool {
 	return (c.tail+1)%c.maxSize == c.head
 }
 
-// 判断环形队列是否为空
+// IsEmpty 判断环形队列是否为空
 func (c *circleQueue) IsEmpty() bool {
 	return c.tail == c.head
 }

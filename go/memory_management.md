@@ -1,4 +1,4 @@
-# 1 Golang内存管理简述：
+# 1 Golang内存管理简述
 
 malloc：内存分配（memory allocation） 
 

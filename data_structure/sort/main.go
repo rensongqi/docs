@@ -9,7 +9,6 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"study/datastruct/heap_sort"
 	"time"
 )
 
@@ -30,6 +29,6 @@ func main() {
 	//insert_sort.InsertSort2(nums)
 	//merge_sort.MergeSort(nums, 0, len(nums)-1)
 	//quick_sort.QuickSort(nums)
-	heap_sort.HeapSort(nums)
+	HeapSort(nums)
 	fmt.Println("after: ", nums)
 }
