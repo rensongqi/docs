@@ -205,5 +205,5 @@ func main() {
 # Usage
 
 ```bash
-curl -X POST -d '{"domain": "*.rsq.com"}' -H 'application/json' http://127.0.0.1:6666/api/v1/ssl
+curl -X POST -d '{"domain": "*.rsq.com"}' -H "Content-Type: application/json" http://127.0.0.1:6666/api/v1/ssl
 ```
