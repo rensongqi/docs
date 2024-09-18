@@ -96,7 +96,7 @@ func generateCertificate(domain string) (err error, pemBody, keyBody []byte) {
       return
    }
    myUser := MyUser{
-      Email: "cowaadmin@cowarobot.com",
+      Email: "admin@rensongqi.com",
       key:   privateKey,
    }
    config := lego.NewConfig(&myUser)
