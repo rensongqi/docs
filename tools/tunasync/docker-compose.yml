@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  tunasync:
+    image: harbor.rsq.cn/library/tunasync:v3
+    container_name: tunasync
+    volumes:
+      - /disk/upload/mirrors:/data/mirrors
+      - ./conf/manager.conf:/data/tunasync/manager.conf
+      - ./conf/resources.conf:/data/tunasync/resources.conf
+      - ./conf/centos.conf:/data/tunasync/centos.conf
+    restart: always
