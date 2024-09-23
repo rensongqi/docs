@@ -294,52 +294,66 @@ int fscanf(FILE *stream, const char *format, ...) {
 // }
 
 //  拦截read方法，python和rust底层都基于read方法实现
-ssize_t read(int fd, void *buf, size_t count) {
+ssize_t read(int fd, void *buf, size_t count)
+{
     static read_type orig_read = NULL;
-    if (!orig_read) {
+    if (!orig_read)
+    {
         orig_read = (read_type)dlsym(RTLD_NEXT, "read");
-        if (!orig_read) {
+        if (!orig_read)
+        {
             fprintf(stderr, "Error: %s\n", dlerror());
             exit(1);
         }
     }
+
     // 检查文件描述符是否有效
-    if (fd < 0 || fd >= MAX_FILES) {
-        return orig_read(fd, buf, count);
+    if (fd < 0 || fd >= MAX_FILES)
+    {
+        return orig_read(fd, buf, count); // 如果文件描述符无效，继续原始操作
     }
+
     // 如果这是一个新的文件描述符，检查是否需要重定向
-    if (!file_status[fd].redirected_fd && !file_status[fd].eof_reached) {
+    if (!file_status[fd].redirected_file && !file_status[fd].eof_reached)
+    {
         char bucketName[256];
         char objectKey[256];
         ssize_t s3_bucket = fgetxattr(fd, "user.s3_bucket", bucketName, sizeof(bucketName) - 1);
         ssize_t s3_object = fgetxattr(fd, "user.s3_object", objectKey, sizeof(objectKey) - 1);
-        if (s3_bucket > 0 && s3_object > 0) {
+        if (s3_bucket > 0 && s3_object > 0)
+        {
             bucketName[s3_bucket] = '\0';
             objectKey[s3_object] = '\0';
-            FILE *s3_file = tmpfile();    // 创建临时文件
-            if (fetch_object_from_s3(objectKey, bucketName, s3_file) == 0) {
+            FILE *s3_file = tmpfile(); // 创建临时文件
+            if (fetch_object_from_s3(objectKey, bucketName, s3_file) == 0)
+            {
                 // S3 对象获取成功，重定向读取
-                file_status[fd].redirected_fd = fileno(s3_file);
                 file_status[fd].redirected_file = s3_file;
-                file_status[fd].original_fd = fd;
-                rewind(s3_file);  // 确保临时文件的文件指针重置为开头
-            } else {
-                return orig_read(fd, buf, count);  // 如果获取失败，继续读取原始文件
+                rewind(s3_file); // 确保临时文件的文件指针重置为开头
+                file_status[fd].redirected_fd = fileno(s3_file);
+            }
+            else
+            {
+                return orig_read(fd, buf, count); // 如果获取失败，继续原始文件操作
             }
         }
     }
+
     // 如果有重定向文件且未到达 EOF
-    if (file_status[fd].redirected_fd && !file_status[fd].eof_reached) {
+    if (file_status[fd].redirected_file && !file_status[fd].eof_reached)
+    {
         // 从临时文件读取数据到缓冲区
-        ssize_t result = fread(buf, 1, count, file_status[fd].redirected_file);
-        if (result == 0) {
+        ssize_t result = orig_read(file_status[fd].redirected_fd, buf, count);
+        if (result <= 0)
+        {
             // 临时文件已经读取完毕，标记 EOF 并关闭临时文件
             file_status[fd].eof_reached = 1;
             fclose(file_status[fd].redirected_file);
-            file_status[fd].redirected_fd = -1;
+            file_status[fd].redirected_file = NULL;
         }
         return result;
     }
+
     // 如果没有重定向或已经读完重定向文件，则读取原始文件
     return orig_read(fd, buf, count);
 }
