@@ -94,7 +94,7 @@ EOF
 version: '3.8'
 services:
   seaweed-master:
-    image: harbor.cowarobot.cn/docker.io/chrislusf/seaweedfs:latest
+    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
     container_name: seaweedfs-master
     network_mode: host
     restart: always
@@ -112,7 +112,7 @@ services:
       -volumePreallocate
 
   seaweed-volume:
-    image: harbor.cowarobot.cn/docker.io/chrislusf/seaweedfs:latest
+    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
     container_name: seaweedfs-volume
     network_mode: host
     restart: always
@@ -134,7 +134,7 @@ services:
       -readBufferSizeMB=64
 
   seaweed-filer:
-    image: harbor.cowarobot.cn/docker.io/chrislusf/seaweedfs:latest
+    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
     container_name: seaweedfs-filer
     network_mode: host
     restart: always
@@ -151,7 +151,7 @@ services:
       -metricsPort=9997
 
   seaweed-s3:
-    image: harbor.cowarobot.cn/docker.io/chrislusf/seaweedfs:latest
+    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
     container_name: seaweedfs-s3
     network_mode: host
     restart: always
@@ -171,7 +171,7 @@ services:
 version: '3.8'
 services:
   seaweedfs-master:
-    image: harbor.cowarobot.cn/docker.io/chrislusf/seaweedfs:latest
+    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
     container_name: seaweedfs-master
     network_mode: host
     restart: always
@@ -193,7 +193,7 @@ services:
 version: '3.8'
 services:
   seaweedfs-master:
-    image: harbor.cowarobot.cn/docker.io/chrislusf/seaweedfs:latest
+    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
     container_name: seaweedfs-master
     network_mode: host
     restart: always

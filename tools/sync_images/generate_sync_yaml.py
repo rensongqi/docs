@@ -75,7 +75,7 @@ def get_harbor_tags(project):
     # Harbor 服务器信息
     harbor_url = "https://harbor.rsq.cn"
     username = "harbor"
-    password = "GphVjjGe0"
+    password = "xxxxxxxxx"
     # 分页获取数据
     project_page = 1
     project_page_size = 100
