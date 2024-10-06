@@ -1,0 +1,13 @@
+version: '3'
+services:
+  sync_docker_images:
+    image: harbor.rsq.cn/projects/sync_docker_images:2024-07-04-CST-095928
+    hostname: sync_docker_images
+    container_name: sync_docker_images
+    network_mode: host
+    extra_hosts:
+      - "gcr.io:64.233.189.82"
+      - "registry.k8s.io:34.96.108.209"
+    ports:
+      - "8888:8888"
+    restart: always

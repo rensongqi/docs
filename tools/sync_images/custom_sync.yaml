@@ -1,0 +1,7 @@
+gcr.io:
+  images:
+    kaniko-project/executor: 
+     - 'latest'
+     - 'v1.8.1'
+     - 'debug'
+     - 'v1.8.1-debug'
