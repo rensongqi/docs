@@ -227,5 +227,5 @@ docker-compose up -d seaweedfs-s3
 
 # 3 挂载
 ```bash
-weed mount -filer=172.16.90.172:8888 -filer.path=/data -dir=/mnt/weed -cacheCapacityMB=4000 -cacheDir=/tmp -chunkSizeLimitMB=8 -volumeServerAccess=direct
+weed -v 4 mount -filer=172.16.90.172:8888 -filer.path=/data -dir=/mnt/weed -cacheDir=/mnt -chunkSizeLimitMB=8 -volumeServerAccess=direct
 ```
