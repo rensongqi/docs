@@ -24,14 +24,20 @@ IDE安装`Continue`插件，修改模型为本地模型
       "title": "Claude 3.5 Sonnet"
     },
     {
-      "apiBase": "http://192.168.1.100:11434/",
+      "apiBase": "https://chat.rsq.cn",
       "title": "Llama3.1 8B",
       "provider": "ollama",
       "model": "llama3.1:8b"
+    },
+    {
+      "apiBase": "https://chat.rsq.cn",
+      "title": "Deepseek-coder:6.7b",
+      "provider": "ollama",
+      "model": "deepseek-coder:6.7b"
     }
   ],
   "tabAutocompleteModel": {
-    "apiBase": "http://192.168.1.100:11434/",
+    "apiBase": "https://chat.rsq.cn",
     "title": "Llama3.1 8B",
     "provider": "ollama",
     "model": "llama3.1:8b"
@@ -79,9 +85,20 @@ IDE安装`Continue`插件，修改模型为本地模型
       "name": "commit",
       "description": "Generate a git commit message"
     }
-  ]
+  ],
+  "embeddingsProvider": {
+    "provider": "ollama"
+  },
+  "reranker": {
+    "name": "llm",
+    "params": {
+      "modelTitle": "Llama3.1 8B"
+    }
+  }
 }
 ```
 
 效果示例
 ![Llama3.1:8b](../../img/Llama3.18b.jpg)
+
+- slashCommands: 支持快捷操作

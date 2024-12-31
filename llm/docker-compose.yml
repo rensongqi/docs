@@ -1,0 +1,43 @@
+services:
+  ollama:
+    volumes:
+      - ./ollama-data:/root/.ollama
+    container_name: ollama
+    pull_policy: always
+    tty: true
+    restart: unless-stopped
+    image: ollama/ollama:latest
+    # GPU support
+    ports:
+      - 11434:11434
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: ${OLLAMA_GPU_DRIVER-nvidia}
+              device_ids: ["0", "1", "2", "3"]
+                # count: ${OLLAMA_GPU_COUNT-1}
+              capabilities:
+                - gpu
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:v0.5.2
+    container_name: open-webui
+    volumes:
+      - ./open-webui-data:/app/backend/data
+    depends_on:
+      - ollama
+    ports:
+      - ${OPEN_WEBUI_PORT-3000}:8080
+    environment:
+      - 'OLLAMA_BASE_URL=http://ollama:11434'
+      - 'WEBUI_SECRET_KEY=711c271e-5fa5-11ef-838b-739105e81482'
+      - 'ENABLE_OPENAI_API=false'
+      - 'ENABLE_LITELLM=false'
+      - 'HF_ENDPOINT=https://hf-mirror.com'
+      - 'WHISPER_MODEL_AUTO_UPDATE=false'
+      - 'RAG_EMBEDDING_MODEL_AUTO_UPDATE=false'
+      - 'RAG_RERANKING_MODEL_AUTO_UPDATE=false'
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    restart: unless-stopped
