@@ -213,7 +213,7 @@ func parseImageAndSync(images string) (err error, privateImagePath string) {
 	if strings.HasPrefix(images, "nvcr.io") {
 		return fmt.Errorf("nvidia镜像目前暂不支持，请等待后续优化"), ""
 	}
-	dockerProxy := "docker.lixd.xyz"
+	dockerProxy := "docker.libcuda.so"
 	imageServer := "docker.io"
 	imageName := ""
 	destRepo := ""
@@ -260,7 +260,7 @@ func parseImageAndSync(images string) (err error, privateImagePath string) {
 		}
 	} else {
 		proxyAdd := fmt.Sprintf("%s/%s", dockerProxy, images)
-		destRepo = fmt.Sprintf("harbor.rsq.cn/docker.io")
+		destRepo = "harbor.rsq.cn/docker.io"
 		privateImagePath = fmt.Sprintf("%s/%s", destRepo, images)
 		command = append(command, proxyAdd, destRepo)
 	}
@@ -285,6 +285,7 @@ func parseImageAndSync(images string) (err error, privateImagePath string) {
 
 	return
 }
+
 
 // 解析oagit webhook的issue信息
 func parseGitIssueInfos(c *gin.Context) {
