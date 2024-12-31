@@ -190,17 +190,19 @@ func getProxyAddr(imageServer string) (dockerProxy string) {
 	if strings.Contains(imageServer, ".") {
 		switch imageServer {
 		case "registry.k8s.io":
-			dockerProxy = "k8s.lixd.xyz"
+			dockerProxy = "k8s-gcr.libcuda.so"
+		case "ghcr.io":
+			dockerProxy = "ghcr.libcuda.so"
 		case "k8s.gcr.io":
-			dockerProxy = "k8s.lixd.xyz"
+			dockerProxy = "k8s-gcr.libcuda.so"
 		case "gcr.io":
-			dockerProxy = "gcr.io"
+			dockerProxy = "gcr.libcuda.so"
 		case "docker.io":
-			dockerProxy = "docker.lixd.xyz"
+			dockerProxy = "docker.libcuda.so"
 		case "nvcr.io":
 			dockerProxy = "ngc.nju.edu.cn"
 		default:
-			dockerProxy = "docker.lixd.xyz"
+			dockerProxy = "docker.libcuda.so"
 		}
 	}
 	return
