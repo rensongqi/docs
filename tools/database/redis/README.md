@@ -1,5 +1,5 @@
 
-# 1 主从
+# 1 主从配置
 docker-compose.yml
 ```yml
 version: '3'
