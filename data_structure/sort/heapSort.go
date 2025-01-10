@@ -1,4 +1,4 @@
-package main
+package heap_sort
 
 import "codes/sort/swap"
 

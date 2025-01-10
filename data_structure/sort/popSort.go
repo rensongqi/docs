@@ -4,7 +4,7 @@
  * @Date 2023/12/28 23:03
  **/
 
-package main
+package pop_sort
 
 import (
 	"fmt"

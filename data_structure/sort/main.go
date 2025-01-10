@@ -29,6 +29,7 @@ func main() {
 	//insert_sort.InsertSort2(nums)
 	//merge_sort.MergeSort(nums, 0, len(nums)-1)
 	//quick_sort.QuickSort(nums)
+	//radix_sort.RadixSort(nums)
 	HeapSort(nums)
 	fmt.Println("after: ", nums)
 }
