@@ -14,7 +14,7 @@ func process(nums []int, l, r int) float64 {
 	if l == r {
 		return float64(nums[l])
 	}
-	mid := l + ((r - l) >> 1)
+	mid := l + ((r - l) >> 1) // >> 1 右移一位代表 / 2 ，但是比除以2快
 	leftMax := process(nums, l, mid)
 	rightMax := process(nums, mid+1, r)
 	return math.Max(float64(leftMax), float64(rightMax))
