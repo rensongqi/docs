@@ -72,7 +72,7 @@ func (s *SingleLinkedList) Reverse() {
 	s.Head = prev
 }
 
-// LocalReverse 不借助辅助空间，实现O(1)的链表反转
+// LocalReverse 实现空间复杂度O(1)，时间复杂度O(n)的链表反转
 // 连 掉 接 移
 func (s *SingleLinkedList) LocalReverse() {
 	if s.Head == nil || s.Head.Next == nil || s.Head.Next.Next == nil {
