@@ -1,4 +1,4 @@
-package main
+package quick_sort
 
 import (
 	"codes/sort/swap"
@@ -34,8 +34,8 @@ func quick(nums []int, l, r int) {
 func partition(nums []int, l, r int) []int {
 	le := l - 1    // <区域边界
 	more := r      // >区域边界
-	for l < more { // l表示当前数的位置，arr[r] -> 划分值
-		if nums[l] < nums[r] { // 当前数 < 划分数
+	for l < more { // l表示当前数的位置，左区第一个位置的元素，nums[r] : 划分值
+		if nums[l] < nums[r] { // 当前数 < 划分数 可以理解为左右区域数值进行对比
 			le++
 			swap.Swap(nums, le, l)
 			l++

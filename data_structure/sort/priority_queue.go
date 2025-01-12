@@ -1,6 +1,6 @@
 // 优先队列是一种特殊类型的队列，它与普通队列的区别在于每个元素都关联有一个优先级。
 // 在优先队列中，元素按照优先级的顺序进行排列，而不是按照它们进入队列的顺序排列。
-package main
+package priority_queue
 
 import (
 	"container/heap"
@@ -44,7 +44,7 @@ func (pq *PriorityQueue) Pop() interface{} {
 	return item
 }
 
-func main() {
+func mainT() {
 	items := map[string]int{
 		"banana": 3, "apple": 2, "pear": 4,
 	}

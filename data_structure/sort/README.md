@@ -1,21 +1,25 @@
-[TOC]
-
 
 
 排序是将一组数据，依照指定的顺序进行排列的过程，常见的排序有如下几种
+
+在算法中，**稳定性**是指排序算法在对具有相同值的元素进行排序时，能否保持这些元素在原始数据中的相对顺序。
+
+- 如果排序前，数据中两个元素 A 和 B 的值相等，且 A 在 B 前面。
+- 如果排序后，A 仍然在 B 前面，则该排序算法是稳定的。
 
 # 1 时间和空间复杂度
 
 这里描述的都是最坏时间复杂度
 
-| 算法          | 时间复杂度      | 空间复杂度   |
-|-------------|------------|---------|
-| 选择          | O(N^2)     | O(1)    |
-| 冒泡          | O(N^2)     | O(1)    |
-| 插入          | O(N^2)     | O(1)    |
-| 归并          | O(N*logN)  | O(N)    |
-| 快排          | O(N*logN)  | O(logN) |
-| 堆排          | O(N*logN)  | O(1)    |
+| 算法          | 时间复杂度      | 空间复杂度   | 稳定性   |
+|-------------|------------|---------|---------|
+| 选择          | O(N^2)     | O(1)    | 不稳定 |
+| 冒泡          | O(N^2)     | O(1)    | 稳定 |
+| 插入          | O(N^2)     | O(1)    | 稳定 |
+| 归并          | O(N*logN)  | O(N)    | 稳定 |
+| 快排          | O(N*logN)  | O(logN) | 不稳定 |
+| 堆排          | O(N*logN)  | O(1)    | 不稳定 |
+| 基数          | O(N*K)  | O(n+k)    | 稳定 |
 
 ## 1 冒泡排序
 
@@ -182,19 +186,19 @@ import "fmt"
 func quickSort(arr []int, left, right int) {
 	if left < right {
 		i, j := left, right
-    // 设置key
+        // 设置key
 		key := arr[(left+right)/2]
-    // for循环的目的是将比key小的数放到左边，比key大的值放到右边
+    	// for循环的目的是将比key小的数放到左边，比key大的值放到右边
 		for i <= j {
-      //循环key之前的所有值，当值小于key时，i++(下标后移)
+        //循环key之前的所有值，当值小于key时，i++(下标后移)
 			for arr[i] < key {
 				i++
 			}
-      //循环key之后的所有值，当值大于key时，j--(下标前移)
+      		//循环key之后的所有值，当值大于key时，j--(下标前移)
 			for arr[j] > key {
 				j--
 			}
-      //一旦左右都出现了下标不符合的条件，那么就交换左右两边的值
+      		//一旦左右都出现了下标不符合的条件，那么就交换左右两边的值
 			if i <= j {
 				arr[i], arr[j] = arr[j], arr[i]
 				i++
@@ -218,8 +222,6 @@ func main() {
 }
 ```
 
-
-
 ## 5 堆排序
 
 堆排序步骤：
@@ -236,11 +238,97 @@ func main() {
 1. 相同点：堆排序和快速排序的平均时间复杂度都是`O(nlogn)`，并且都是不稳定排序
 2. 不同点：快速排序的最坏时间复杂度是`O(n^2)`，而堆排序的最坏时间复杂度稳定在`O(nlogn)`；快速排序递归和非递归放大的平均时间复杂度都是`O(logn)`，而堆排序的空间复杂度是`O(1)`
 
-## 6 计数排序
+## 6 基数排序
+
+基数排序的逻辑步骤
+
+以整数数组为例，排序 [170, 45, 75, 90, 802, 24, 2, 66]：
+1. 确定最大位数
+找到数组中最大数的位数（例如，802 有 3 位）。这决定了排序需要的轮次。
+
+2. 逐位排序
+从最低位开始（个位 -> 十位 -> 百位），每轮将数组按当前位的数字排序。
+
+3. 稳定排序
+每次排序确保相同位数相同的数字保持原有相对顺序。
+
+基数排序的核心思想
+1. 最低位优先（LSD）
+从最低有效位（Least Significant Digit）开始排序，逐步向高位移动。
+
+2. 最高位优先（MSD）
+从最高有效位（Most Significant Digit）开始排序，逐步向低位移动。
+
+```go
+package main
+
+import (
+   "fmt"
+   "math"
+)
+
+func RadixSort(nums []int) {
+   if nums == nil || len(nums) < 2 {
+      return
+   }
+   radixSort(nums, 0, len(nums)-1, maxbits(nums))
+}
 
 
+func radixSort(nums []int, l, r, digit int) {
+   const radix = 10
+   i, j := 0, 0
+   bucket := make([]int, r-l+1)
+
+   // 有多少位就进出多少次
+   for d := 1; d <= digit; d++ {
+      count := make([]int, radix)
+      for i = l; i <= r; i++ {
+         j = getDigit(nums[i], d)
+         count[j]++
+      }
+      for i = 1; i < radix; i++ {
+         count[i] += count[i-1]
+      }
+      for i = r; i >= l; i-- {
+         j = getDigit(nums[i], d)
+         bucket[count[j]-1] = nums[i]
+         // 放入之后计数数组对应的位数数量 -1
+         count[j]--
+      }
+      for i, j = l, 0; i <= r; i++ {
+         nums[i] = bucket[j]
+         j++
+      }
+   }
+}
+
+func getDigit(x, d int) int {
+   return (x / int(math.Pow(10, float64(d-1)))) % 10
+}
+
+func maxbits(nums []int) int {
+   maxValue := 0
+   for i := 0; i < len(nums); i++ {
+      if maxValue < nums[i] {
+         maxValue = nums[i]
+      }
+   }
+   res := 0
+   for maxValue != 0 {
+      res++
+      maxValue /= 10
+   }
+   return res
+}
+
+func main() {
+   nums := []int{5, 4, 13, 56, 61, 17, 412, 1212, 8}
+   fmt.Println("原始数组:", nums)
+   RadixSort(nums)
+   fmt.Println("排序后数组:", nums)
+}
+```
 
 ## 7 桶排序
-
-
 
