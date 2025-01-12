@@ -4,6 +4,104 @@
 
 使用带head头的单向链表实现 - 水壶英雄排行榜管理
 
+```go
+package main
+
+import "fmt"
+
+type SingleNode struct {
+	Val  int
+	Next *SingleNode
+}
+
+type SingleLinkedList struct {
+	Head *SingleNode
+}
+
+// Insert 在链表的末尾插入
+func (s *SingleLinkedList) Insert(value int) {
+	newNode := &SingleNode{
+		Val: value,
+	}
+	// 如果头节点的下个节点为空，则头节点的下个节点为新节点
+	if s.Head == nil {
+		s.Head = newNode
+		return
+	}
+	// 链表往后遍历
+	current := s.Head
+	for current.Next != nil {
+		current = current.Next
+	}
+	// 找到链表的末尾，将新节点给插入到末尾
+	current.Next = newNode
+}
+
+func (s *SingleLinkedList) Delete(value int) {
+	current := s.Head
+	if s.Head == nil {
+		return
+	}
+
+	for current.Next.Val != value {
+		current = current.Next
+	}
+
+	current.Next = current.Next.Next
+}
+
+func (s *SingleLinkedList) Print() {
+	current := s.Head
+
+	for current != nil {
+		fmt.Println(current.Val)
+		current = current.Next
+	}
+	fmt.Println("link nil")
+}
+
+func (s *SingleLinkedList) Reverse() {
+	var prev *SingleNode
+	current := s.Head
+	for current != nil {
+		next := current.Next
+		current.Next = prev
+		prev = current
+		current = next
+	}
+	s.Head = prev
+}
+
+// LocalReverse 不借助辅助空间，实现O(1)的链表反转
+// 连 掉 接 移
+func (s *SingleLinkedList) LocalReverse() {
+	if s.Head == nil || s.Head.Next == nil || s.Head.Next.Next == nil {
+		return
+	}
+
+	current := s.Head    // 当前节点
+	var prev *SingleNode // 用于保存反转后的链表头部
+
+	for current != nil {
+		next := current.Next // 暂存下一个节点
+		current.Next = prev  // 反转指针方向
+		prev = current       // 更新 prev
+		current = next       // 移动到下一个节点
+	}
+
+	s.Head = prev // 更新链表头
+}
+
+func main() {
+	list := SingleLinkedList{}
+	list.Insert(1)
+	list.Insert(2)
+	list.Insert(3)
+	list.Insert(4)
+	list.LocalReverse()
+	list.Print()
+}
+```
 
 ## 2、双向链表
 单链表查找的方向只能是一个方向，而双向链表可以向前或者向后查找。
