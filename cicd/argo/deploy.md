@@ -320,7 +320,7 @@ hello-world-9pw7v:           \____\______/
 ```
 
 # 参考文章
-[Argo Workflows部署](https://blog.csdn.net/qq_29062169/article/details/125486646)
-[Kubernetes 原生 CI/CD 构建框架 Argo](https://www.isolves.com/it/cxkf/kj/2021-11-30/46743.html)
-[Argo Workflows —— Kubernetes的工作流引擎入门](https://blog.csdn.net/a772304419/article/details/125463627)
-[给Workflow添加参数](https://www.jianshu.com/p/f7276c61f072)
+- [Argo Workflows部署](https://blog.csdn.net/qq_29062169/article/details/125486646)
+- [Kubernetes 原生 CI/CD 构建框架 Argo](https://www.isolves.com/it/cxkf/kj/2021-11-30/46743.html)
+- [Argo Workflows —— Kubernetes的工作流引擎入门](https://blog.csdn.net/a772304419/article/details/125463627)
+- [给Workflow添加参数](https://www.jianshu.com/p/f7276c61f072)
