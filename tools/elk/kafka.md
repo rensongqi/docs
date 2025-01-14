@@ -1,3 +1,8 @@
+- [1 单节点部署](#1-单节点部署)
+- [2 多节点部署](#2-多节点部署)
+- [3 公网访问kafka](#3-公网访问kafka)
+- [4 生产者](#4-生产者)
+- [5 消费者](#5-消费者)
 
 # 1 单节点部署
 
@@ -133,4 +138,93 @@ listener.security.protocol.map=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
 listeners=INTERNAL://172.18.100.67:9092,EXTERNAL://172.18.100.67:19092
 advertised.listeners=INTERNAL://172.18.100.67:9092,EXTERNAL://123.23.4.5:19092
 inter.broker.listener.name=INTERNAL
+```
+
+# 4 生产者
+```go
+package main
+import (
+   "fmt"
+   "github.com/IBM/sarama"
+   "os"
+)
+func main() {
+   // Kafka broker 地址
+   //brokers := []string{"172.16.100.107:9092"}
+   brokers := []string{"172.18.100.67:9092"}
+   // 新建 sarama 配置实例
+   config := sarama.NewConfig()
+   config.Producer.RequiredAcks = sarama.WaitForAll          // 等待所有副本都保存成功
+   config.Producer.Partitioner = sarama.NewRandomPartitioner // 随机的分区方式
+   config.Producer.Return.Successes = true                   // 成功交付的消息将在 success channel 返回
+   // 使用配置,新建一个异步生产者
+   producer, err := sarama.NewAsyncProducer(brokers, config)
+   if err != nil {
+      fmt.Println("Failed to start producer:", err)
+      os.Exit(1)
+   }
+   // 构建发送的消息，
+   msg := &sarama.ProducerMessage{
+      Topic: "ultron",
+      Value: sarama.StringEncoder("测试消息"),
+   }
+   // 发送消息
+   producer.Input() <- msg
+   // 等待消息发送完成
+   select {
+   case suc := <-producer.Successes():
+      fmt.Printf("offset: %d,  timestamp: %s\n", suc.Offset, suc.Timestamp.String())
+   case fail := <-producer.Errors():
+      fmt.Printf("err: %s\n", fail.Err.Error())
+   }
+}
+```
+
+# 5 消费者
+```go
+package main
+import (
+   "fmt"
+   "github.com/IBM/sarama"
+   "os"
+   "os/signal"
+   "syscall"
+)
+func saramaKafka() {
+   config := sarama.NewConfig()
+   config.Consumer.Return.Errors = true
+   brokers := []string{"172.18.100.67:9092"}
+   topic := "ultron"
+   // 创建消费者
+   master, err := sarama.NewConsumer(brokers, config)
+   if err != nil {
+      panic(err)
+   }
+   defer func() {
+      if err := master.Close(); err != nil {
+         panic(err)
+      }
+   }()
+   consumer, err := master.ConsumePartition(topic, 0, sarama.OffsetOldest)
+   if err != nil {
+      panic(err)
+   }
+   signals := make(chan os.Signal, 1)
+   signal.Notify(signals, syscall.SIGTERM)
+   consumed := 0
+ConsumerLoop:
+   for {
+      select {
+      case msg := <-consumer.Messages():
+         fmt.Printf("Consumed message offset %d\n", string(msg.Value))
+         consumed++
+      case <-signals:
+         break ConsumerLoop
+      }
+   }
+   fmt.Printf("Consumed: %d\n", consumed)
+}
+func main() {
+   saramaKafka()
+}
 ```
