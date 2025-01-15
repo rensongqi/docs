@@ -112,3 +112,4 @@ ibping <server lid port>
 
 **参考文章**
 - [RDMA(远程直接内存访问)原理架构图文详解+与传统通信模式对比](https://zhuanlan.zhihu.com/p/701779103)
+- [GPU 主机如何开启 GDS](https://www.chenshaowen.com/blog/how-to-enable-gds-on-gpu-host.html)
