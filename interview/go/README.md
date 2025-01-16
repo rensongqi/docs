@@ -51,6 +51,19 @@ type Context interface {
 
 # 3 channel相关
 channel 数据结构：
+```go
+type hchan struct {
+    qcount   uint   // 队列中当前的元素个数
+    dataqsiz uint   // 环形队列的大小（缓冲区大小）
+    buf      unsafe.Pointer // 环形队列的指针（存储数据）
+    sendx    uint   // 发送索引（用于环形队列）
+    recvx    uint   // 接收索引（用于环形队列）
+    recvq    waitq  // 等待接收的 Goroutine 队列
+    sendq    waitq  // 等待发送的 Goroutine 队列
+    lock     mutex  // 互斥锁，保证并发安全
+}
+```
+
 1、channel 是否线程安全？锁用在什么地方？
 - 发送一个数据到channel和从channel接收一个数据 \都是原子操作，而且Go的设计思想就是:`不要通过共享内存来通信（加锁），而是通过通信来共享内存（channel）`，前者就是传统的加锁，后者就是Channel，也就是说，设计Channel的主要目的就是在多任务间传递数据的，这当然是安全的。
 - 锁用在数据入队列和出队列
@@ -76,6 +89,11 @@ channel 数据结构：
 
 6、channel 分配在栈上还是堆上？哪些对象分配在堆上，哪些对象分配在栈上？
 - 根据channel中数据类型而定
+
+7、channel 调度策略
+- FIFO 调度：发送 Goroutine 和接收 Goroutine 按顺序排队（先进先出）。
+- 无锁（读写分离）：有缓冲 channel 读写不同 buf 索引，减少锁冲突。
+- 超时机制：select 语句支持 timeout，防止 Goroutine 永远阻塞。
 
 # 3 map相关
 1、map 使用注意的点，并发安全？
