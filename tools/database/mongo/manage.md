@@ -1,9 +1,12 @@
-- [1用户管理](#1-用户管理)
-    - [1.1 角色](#11-角色)
-    - [1.2 注意事项](#12-注意事项)
-    - [1.3 给单个数据库创建用户](#13-给单个数据库创建用户)
-    - [1.4 给一个用户授权多个数据库](#14-给一个用户授权多个数据库)
-    - [1.5 其它命令](#15-其它命令)
+- [1 用户管理](#1-用户管理)
+  - [1.1 角色](#11-角色)
+  - [1.2 注意事项](#12-注意事项)
+  - [1.3 给单个数据库创建用户](#13-给单个数据库创建用户)
+  - [1.4 给一个用户授权多个数据库](#14-给一个用户授权多个数据库)
+  - [1.5 其它命令](#15-其它命令)
+  - [1.6 对比两个mongo重复的collections](#16-对比两个mongo重复的collections)
+  - [1.7 mongo间数据迁移](#17-mongo间数据迁移)
+- [参考文章](#参考文章)
 
 
 # 1 用户管理
@@ -133,6 +136,74 @@ db.createRole({
 
 # 删除角色
 db.dropRole( "aiPolicyRole", { w: "majority" } ) 
+```
+
+## 1.6 对比两个mongo重复的collections
+使用mongosh，[下载地址](https://www.mongodb.com/try/download/shell)
+
+```
+// 配置两个 MongoDB 集群的连接信息
+const cluster1 = new Mongo("mongodb://user1:password1@host1:27017");
+const cluster2 = new Mongo("mongodb://user2:password2@host2:27017");
+
+// 获取所有集合的全路径列表
+function getAllCollections(cluster) {
+    const collections = [];
+    const databases = cluster.getDB("admin").adminCommand("listDatabases").databases;
+
+    databases.forEach((dbInfo) => {
+        const dbName = dbInfo.name;
+        const db = cluster.getDB(dbName);
+        const collNames = db.getCollectionNames();
+
+        collNames.forEach((collName) => {
+            collections.push(`${dbName}.${collName}`);
+        });
+    });
+
+    return collections;
+}
+
+// 获取两个集群的集合列表
+const collectionsCluster1 = getAllCollections(cluster1);
+const collectionsCluster2 = getAllCollections(cluster2);
+
+// 比对两个集合列表，找出重复项
+const duplicateCollections = collectionsCluster1.filter((coll) =>
+    collectionsCluster2.includes(coll)
+);
+
+// 打印结果
+if (duplicateCollections.length > 0) {
+    print("重复的集合列表：");
+    duplicateCollections.forEach((coll) => print(coll));
+} else {
+    print("没有发现重复的集合。");
+}
+```
+
+## 1.7 mongo间数据迁移
+
+使用mongodump和mongorestore，[下载地址](https://www.mongodb.com/try/download/database-tools)
+
+collection.list
+```
+ai-3d-test
+ai-2d-test
+...
+```
+
+dump.sh
+```bash
+mkdir -p /data/mongo_dump
+while read line; do
+    mongodump -u root -p <pass> --authenticationDatabase admin -d $line -o ./dump/
+done < collection.list
+```
+
+restore.sh
+```bash
+mongorestore  -u root -p <pass> --host mongo.rsq.cn:27017 --authenticationDatabase admin --dir=/data/mongo_dump --drop
 ```
 
 # 参考文章
