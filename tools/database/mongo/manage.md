@@ -141,6 +141,7 @@ db.dropRole( "aiPolicyRole", { w: "majority" } )
 ## 1.6 对比两个mongo重复的collections
 使用mongosh，[下载地址](https://www.mongodb.com/try/download/shell)
 
+compare.sc
 ```
 // 配置两个 MongoDB 集群的连接信息
 const cluster1 = new Mongo("mongodb://user1:password1@host1:27017");
@@ -182,9 +183,15 @@ if (duplicateCollections.length > 0) {
 }
 ```
 
+执行脚本
+
+```bash
+mongosh -f compare.sc
+```
+
 ## 1.7 mongo间数据迁移
 
-使用mongodump和mongorestore，[下载地址](https://www.mongodb.com/try/download/database-tools)
+需要使用`mongodump`和`mongorestore`，[下载地址](https://www.mongodb.com/try/download/database-tools)
 
 collection.list
 ```
