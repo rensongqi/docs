@@ -39,6 +39,33 @@ func PostOrder(rootNode *Student) {
 	}
 }
 
+// 层序遍历（BFS）
+func levelOrderTraversal(rootNode *Student) {
+	if rootNode == nil {
+		return
+	}
+
+	// 使用切片作为队列
+	queue := []*Student{rootNode}
+
+	for len(queue) > 0 {
+		// 取出队列的第一个元素
+		node := queue[0]
+		queue = queue[1:] // 出队
+
+		// 处理当前节点
+		fmt.Printf("No: %d, Name: %s\n", node.No, node.Name)
+
+		// 将左右子节点加入队列
+		if node.Left != nil {
+			queue = append(queue, node.Left)
+		}
+		if node.Right != nil {
+			queue = append(queue, node.Right)
+		}
+	}
+}
+
 func main() {
 	/**
 	                   stu1
@@ -71,4 +98,6 @@ func main() {
 	//后序遍历
 	PostOrder(stu1)
 	fmt.Println()
+	// 层序遍历
+	levelOrderTraversal(stu1)
 }

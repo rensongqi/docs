@@ -123,73 +123,68 @@ func main() {
    输出顺序是根节点、左子树、右子树
 
    ```go
-   //前序遍历
-   func PreOrder(rootNode *Student) (res []int) {
-       var traversal func(node *TreeNode)
-       traversal = func(node *TreeNode) {
-           if node == nil {
-           	return
-   		}
-           res = append(res, node.Val)
-           traversal(node.Left)
-           traversal(node.Right)
-       }
-       traversal(root)
-       return res
-   }
+    func PreOrder(rootNode *Student) {
+        if rootNode != nil {
+            fmt.Printf("%d\t %s\n", rootNode.No, rootNode.Name)
+            PreOrder(rootNode.Left)
+            PreOrder(rootNode.Right)
+        }
+    }
    ```
-
-   
 
 2. 中序遍历
 
    输出顺序是左子树、根节点、右子树
 
    ```go
-   //中序遍历
-   func InfixOrder(rootNode *Student) (res []int) {
-       var traversal func(node *TreeNode)
-       traversal = func(node *TreeNode) {
-           if node == nil {
-           	return
-   		}
-           traversal(node.Left)
-           res = append(res, node.Val)
-           traversal(node.Right)
-       }
-       traversal(root)
-       return res
-   }
+    func InfixOrder(rootNode *Student) {
+        if rootNode != nil {
+            InfixOrder(rootNode.Left)
+            fmt.Printf("%d\t %s\n", rootNode.No, rootNode.Name)
+            InfixOrder(rootNode.Right)
+        }
+    }
    ```
-
-   
 
 3. 后序遍历
 
    输出顺序是左子树、右子树、根节点
 
    ```go
-   //后序遍历
-   func PostOrder(rootNode *Student) (res []int) {
-       var traversal func(node *TreeNode)
-       traversal = func(node *TreeNode) {
-           if node == nil {
-           	return
-   		}
-           traversal(node.Left)
-           traversal(node.Right)
-           res = append(res, node.Val)
-       }
-       traversal(root)
-       return res
-   }
+    func PostOrder(rootNode *Student) {
+        if rootNode != nil {
+            PostOrder(rootNode.Left)
+            PostOrder(rootNode.Right)
+            fmt.Printf("%d\t %s\n", rootNode.No, rootNode.Name)
+        }
+    }
    ```
-
-   
 
 4. 层序遍历
 
-   输出顺序
+```go
+func levelOrderTraversal(rootNode *Student) {
+	if rootNode == nil {
+		return
+	}
+	// 使用切片作为队列
+	queue := []*Student{rootNode}
+	for len(queue) > 0 {
+		// 取出队列的第一个元素
+		node := queue[0]
+		queue = queue[1:] // 出队
+		// 处理当前节点
+		fmt.Printf("No: %d, Name: %s\n", node.No, node.Name)
+		// 将左右子节点加入队列
+		if node.Left != nil {
+			queue = append(queue, node.Left)
+		}
+		if node.Right != nil {
+			queue = append(queue, node.Right)
+		}
+	}
+}
+```
 
 宏观上讲，二叉树遍历归结为两大类：
 
