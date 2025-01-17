@@ -1,7 +1,3 @@
-[TOC]
-
-
-
 # 1 Centos7 安装MySQL 8.0
 
 ```bash

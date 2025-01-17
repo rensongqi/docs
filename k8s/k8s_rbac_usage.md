@@ -1,5 +1,3 @@
-[TOC]
-
 # 1 什么是RBAC
 **RBAC(Role-Based Access Control)** 基于角色的访问控制，顾名思义就是通过给角色赋予相应的权限，从而使得该角色具有访问相关资源的权限，而在K8s中这些资源分属于两个级别，名称空间（`role/rolebinding`）和集群级别（`clusterrole/clusterrolebinding`）这两个都是标准的K8s资源，可以直接定义。
 **k8s集群有两类认证时的Account：**`useraccount`（管理者、访问者）、`serviceaccount`（pod）。这些Account就是下文中我们提到的User，这两种User面向的对象不同。
@@ -7,7 +5,7 @@
 - **ServiceAccount**是为了方便Pod里面的进程调用Kubernetes API或其他外部服务。
 - **User account**是为人设计的，而ServiceAccount则是为了Pod中的进程，此外User Account是跨Namespace的，而ServiceAccount则是仅局限它所在的Namespace
 
-![RBAC](https://img-blog.csdnimg.cn/20200619153906469.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L01yX3JzcQ==,size_16,color_FFFFFF,t_70#pic_center)
+![RBAC](../img/rbac.png)
 如上图所示，在不同名称空间中，我们需要有一个Role，此Role定义了User访问此名称空间的权限，如GET、WATCH、LIST等，通过RoleBinding，使得Role和User进行关联，从而授权User具有相关资源的访问权限，这样就是一个`Role/RoleBinding`。但是刚才说的只是针对当前名称空间的绑定授权，那如果一个Role想要具有访问整个集群的权限，这个时候就需要使用到`ClusterRole`和`ClusterRoleBinding`了。
 **示例说明：** 
 

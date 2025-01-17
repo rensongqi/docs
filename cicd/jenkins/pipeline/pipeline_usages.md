@@ -1,5 +1,3 @@
-[toc]
-
 ## 1 Pipeline 批量pull code
 
 ```groovy
