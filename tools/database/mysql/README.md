@@ -1,3 +1,26 @@
+- [1 Centos7 安装MySQL 8.0](#1-centos7-安装mysql-80)
+- [2 SQL 基础语法](#2-sql-基础语法)
+  - [1.1 SQL DML 和 DDL](#11-sql-dml-和-ddl)
+  - [1.2 创建表](#12-创建表)
+  - [1.3 查询表](#13-查询表)
+  - [1.4 WHERE](#14-where)
+  - [1.5 ORDER BY](#15-order-by)
+  - [1.6 INSERT](#16-insert)
+  - [1.7 UPDATE](#17-update)
+  - [1.8 DELETE](#18-delete)
+- [2 SQL 高级语法](#2-sql-高级语法)
+  - [2.1 LIKE](#21-like)
+  - [2.2 通配符](#22-通配符)
+  - [2.3 IN](#23-in)
+  - [2.4 BETWEEN](#24-between)
+  - [2.5 Alias](#25-alias)
+  - [2.6 Join](#26-join)
+  - [2.7 UNION/UNION ALL](#27-unionunion-all)
+- [3 SQL 函数](#3-sql-函数)
+- [4 SQL 高级操作](#4-sql-高级操作)
+  - [4.1 复制表](#41-复制表)
+- [5 SQL 内置语法](#5-sql-内置语法)
+
 # 1 Centos7 安装MySQL 8.0
 
 ```bash
