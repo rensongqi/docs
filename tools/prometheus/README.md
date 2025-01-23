@@ -1,0 +1,3 @@
+
+dcgm_exporter推荐容器安装
+node_exporter推荐本地服务的形式安装

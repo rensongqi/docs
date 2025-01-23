@@ -1,0 +1,241 @@
+- job_name: devops_platform/monitoring/node_exporter
+  scrape_interval: 15s
+  scrape_timeout: 5s
+  consul_sd_configs:
+    - server: '172.16.14.101:30085'
+      token: '88fc5e3f-5db7-4075-9914-8ae27b64fa62'
+      refresh_interval: 30s
+      services: ['devops_platform/monitoring/node_exporter']
+      tags: ['rsq']
+  relabel_configs:
+    - source_labels: [__meta_consul_tags]
+      regex: .*OFF.*
+      action: drop
+    - source_labels: ['__meta_consul_service']
+      target_label: cservice
+    - source_labels: ['__meta_consul_service_metadata_vendor']
+      target_label: vendor
+    - source_labels: ['__meta_consul_service_metadata_region']
+      target_label: region
+    - source_labels: ['__meta_consul_service_metadata_department']
+      target_label: department
+    - source_labels: ['__meta_consul_service_metadata_namespace']
+      target_label: namespace
+    - source_labels: ['__meta_consul_service_metadata_ip']
+      target_label: ip
+    - source_labels: ['__meta_consul_service_metadata_env']
+      target_label: env
+    - source_labels: ['__meta_consul_service_metadata_os']
+      target_label: os
+    - source_labels: ['__meta_consul_service_metadata_name']
+      target_label: name
+    - source_labels: ['__meta_consul_service_metadata_iid']
+      target_label: iid
+    - source_labels: ['__meta_consul_service_metadata_exp']
+      target_label: exp
+    - source_labels: ['__meta_consul_service_metadata_instance']
+      target_label: instance
+    - source_labels: [instance]
+      target_label: __address__
+- job_name: devops_platform/monitoring/dcgm_exporter
+  scrape_interval: 15s
+  scrape_timeout: 5s
+  consul_sd_configs:
+    - server: '172.16.14.101:30085'
+      token: '88fc5e3f-5db7-4075-9914-8ae27b64fa62'
+      refresh_interval: 30s
+      services: ['devops_platform/monitoring/dcgm_exporter']
+      tags: ['rsq']
+  relabel_configs:
+    - source_labels: [__meta_consul_tags]
+      regex: .*OFF.*
+      action: drop
+    - source_labels: ['__meta_consul_service']
+      target_label: cservice
+    - source_labels: ['__meta_consul_service_metadata_vendor']
+      target_label: vendor
+    - source_labels: ['__meta_consul_service_metadata_region']
+      target_label: region
+    - source_labels: ['__meta_consul_service_metadata_department']
+      target_label: department
+    - source_labels: ['__meta_consul_service_metadata_namespace']
+      target_label: namespace
+    - source_labels: ['__meta_consul_service_metadata_ip']
+      target_label: ip
+    - source_labels: ['__meta_consul_service_metadata_env']
+      target_label: env
+    - source_labels: ['__meta_consul_service_metadata_os']
+      target_label: os
+    - source_labels: ['__meta_consul_service_metadata_name']
+      target_label: name
+    - source_labels: ['__meta_consul_service_metadata_iid']
+      target_label: iid
+    - source_labels: ['__meta_consul_service_metadata_exp']
+      target_label: exp
+    - source_labels: ['__meta_consul_service_metadata_instance']
+      target_label: instance
+    - source_labels: [instance]
+      target_label: __address__
+- job_name: 'kubernetes-service-endpoints'
+  kubernetes_sd_configs:
+  - role: endpoints
+  relabel_configs:
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+    action: keep
+    regex: true
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+    action: replace
+    target_label: __scheme__
+    regex: (https?)
+  - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+    action: replace
+    target_label: __metrics_path__
+    regex: (.+)
+  - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+    action: replace
+    target_label: __address__
+    regex: ([^:]+)(?::\d+)?;(\d+)
+    replacement: $1:$2
+  - action: labelmap
+    regex: __meta_kubernetes_service_label_(.+)
+  - source_labels: [__meta_kubernetes_namespace]
+    action: replace
+    target_label: kubernetes_namespace
+  - source_labels: [__meta_kubernetes_service_name]
+    action: replace
+    target_label: kubernetes_name
+- job_name: "elasticsearch1"
+  static_configs:
+  - targets: ["172.16.10.107:9114"]
+- job_name: "elasticsearch2"
+  static_configs:
+  - targets: ["172.16.10.108:9114"]
+- job_name: "elasticsearch3"
+  static_configs:
+  - targets: ["172.16.10.109:9114"]
+- job_name: "elk-kafka"
+  static_configs:
+  - targets: ["172.16.10.107:9308","172.16.10.108:9308","172.16.10.109:9308"]
+    labels:
+      cluster: 'elk-kafka'
+- job_name: "prod-kafka"
+  static_configs:
+  - targets: ["172.16.14.40:9308","172.16.14.41:9308","172.16.14.42:9308"]
+    labels:
+      cluster: 'prod-kafka'
+- job_name: "prod-node-exporter"
+  static_configs:
+  - targets: ["172.16.10.107:9100","172.16.10.108:9100","172.16.10.109:9100"]
+    labels:
+      cluster: 'prod-node-exporter'
+- job_name: "prod-zookeeper"
+  static_configs:
+  - targets: ["172.16.14.40:9141","172.16.14.41:9141","172.16.14.42:9141"]
+- job_name: "elk-logstash"
+  static_configs:
+  - targets: ["172.16.10.107:9304","172.16.10.108:9304","172.16.10.109:9304"]
+- job_name: 'http_service_probe'
+  metrics_path: /probe
+  params:
+    module: [http_2xx]
+  static_configs:
+  - labels:
+      group: ''
+    targets:
+    - http://172.16.14.21:8893/healthy
+    - https://cmdb.rsq.cn/healthz
+  relabel_configs:
+  - source_labels: [__address__]
+    target_label: __param_target
+  - source_labels: [__param_target]
+    target_label: instance
+  - target_label: __address__
+    replacement: 172.16.14.21:9115
+- job_name: "tcp_service_probe"
+  scrape_interval: 5s
+  metrics_path: /probe
+  params:
+    module: [tcp_connect]
+  static_configs:
+  - targets: [ '172.16.14.116:80', '172.16.14.116:9443' ]
+    labels:
+      group: '车联网web服务和grpc服务'
+  - targets: ['172.16.10.57:3306', '172.16.10.57:8086', '172.16.10.57:6379']
+    labels:
+      group: '车联网中间件服务'
+  - targets: ['172.16.14.101:32099', '172.16.14.102:32099', '172.16.14.103:32099']
+    labels:
+      group: 'K8S生产环境Ingress'
+  - targets: ['172.16.14.40:9092', '172.16.14.41:9092', '172.16.14.42:9092', '172.16.14.40:2181', '172.16.14.41:2181', '172.16.14.42:2181']
+    labels:
+      group: 'Kafka生产环境'
+  - targets: ['172.16.10.187:8052']
+    labels:
+      group: 'awx服务'
+  - targets: ['172.16.10.21:10080']
+    labels:
+      group: '生产gitlab01服务'
+  - targets: ['172.16.102.134:443']
+    labels:
+      group: 'ovirt服务'
+  relabel_configs:
+  - source_labels: [__address__]
+    target_label: __param_target
+  - source_labels: [__param_target]
+    target_label: instance
+  - target_label: __address__
+    replacement: 172.16.14.21:9115
+- job_name: "ping_status"
+  scrape_interval: 5s
+  metrics_path: /probe
+  params:
+    module: [icmp]
+  static_configs:
+  - targets: [ '172.16.253.45', '172.16.253.42' ]
+    labels:
+      group: polycom_icmp
+  relabel_configs:
+  - source_labels: [__address__]
+    target_label: __param_target
+  - source_labels: [__param_target]
+    target_label: instance
+  - target_label: __address__
+    replacement: 172.16.14.21:9115
+- job_name: "mysqld_exporter"
+  static_configs:
+  - targets: ["172.16.14.104:9104","172.16.14.105:9104","172.16.10.52:9104","172.16.10.53:9104","172.16.10.57:9104","172.16.10.108:9104","172.16.10.109:9104"]
+- job_name: "redis_exporter"
+  static_configs:
+  - targets: ["172.16.14.103:9121","172.16.10.57:9121","172.16.10.107:9121","172.16.10.108:9121","172.16.10.109:9121"]
+- job_name: "postgresql_exporter"
+  static_configs:
+  - targets: ["172.16.14.109:9187","172.16.14.110:9187"]
+- job_name: "prod-milvus"
+  static_configs:
+  - targets: ["172.16.10.45:9091"]
+- job_name: "prod-mongodb"
+  static_configs:
+  - targets: ["172.16.10.107:9216","172.16.10.108:9216","172.16.10.109:9216"]
+- job_name: "prod-harbor"
+  static_configs:
+  - targets: ["172.16.10.18:9090"]
+- job_name: "prod-gitlab"
+  static_configs:
+  - targets: ["172.16.10.21:9168"]
+- job_name: "prod-argocd"
+  static_configs:
+  - targets: ["172.16.14.104:31082"]
+- job_name: 'influxdb'
+  static_configs:
+  - targets: ["172.16.10.57:9273"]
+- job_name: 'nacos-mysql'
+  static_configs:
+  - targets: ["172.16.112.13:9104"]
+- job_name: 'knative'
+  static_configs:
+  - targets: ["172.16.112.201:32764"]
+- job_name: 'ibinfiband-exporter'
+  scrape_interval: 60s
+  static_configs:
+  - targets: ["172.16.13.208:9315","172.16.13.209:9315","172.16.13.210:9315","172.16.13.211:9315","172.16.1.247:9315","172.16.1.246:9315","172.16.13.244:9315","172.16.1.245:9315","172.16.1.248:9315","172.16.1.249:9315","172.16.1.250:9315","172.16.13.231:9315","172.16.13.232:9315","172.16.13.233:9315","172.16.13.234:9315","172.16.13.251:9315","172.16.13.252:9315","172.16.13.253:9315","172.16.1.242:9315","172.16.1.243:9315","172.16.1.228:9315","172.16.1.229:9315","172.16.1.230:9315","172.16.1.235:9315","172.16.13.236:9315","172.16.13.237:9315","172.16.13.238:9315","172.16.13.239:9315","172.16.13.218:9315","172.16.13.219:9315","172.16.13.220:9315","172.16.13.221:9315","172.16.13.222:9315","172.16.13.224:9315","172.16.13.225:9315","172.16.13.226:9315","172.16.13.227:9315","172.16.13.241:9315","172.16.13.212:9315","172.16.13.213:9315"]
+
