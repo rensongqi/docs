@@ -1,0 +1,5 @@
+---
+- hosts: select_hosts
+  tasks:
+    - include_role:
+        name: config.filebeat

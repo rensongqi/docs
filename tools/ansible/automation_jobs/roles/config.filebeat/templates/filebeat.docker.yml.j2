@@ -1,0 +1,38 @@
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+
+processors:
+# 不收集filebeat和k8s的日志
+- drop_event:
+    when:
+      or:
+        - contains:
+            container.name: "k8s"
+        - contains:
+            container.name: "filebeat"
+
+setup.kibana:
+    host: "172.16.100.107:5601"
+
+# ================================== Outputs ===================================
+output.kafka:
+  hosts: ["172.16.100.107:9092", "172.16.100.108:9092", "172.16.100.109:9092"]
+  topics:
+    - topic: "docker"
+      when:
+        has_fields: ["container.id"]
+    - topic: "system"
+      when.contains:
+        event.module: "system"
+  partition.round_robin:
+    reachable_only: false
+  required_acks: 1
+  compression: gzip
+  max_message_bytes: 1000000

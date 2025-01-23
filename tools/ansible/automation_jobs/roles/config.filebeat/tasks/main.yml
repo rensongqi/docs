@@ -1,0 +1,101 @@
+- name: 检查操作系统
+  ansible.builtin.set_fact:
+    is_ubuntu: "{{ ansible_distribution == 'Ubuntu' }}"
+    is_centos: "{{ ansible_distribution == 'CentOS' }}"
+
+#- name: Centos安装python-docker
+#  when: is_centos
+#  become: yes
+#  yum:
+#    name: python-docker
+#    state: present
+#
+#- name: Ubuntu安装python3-docker
+#  when: is_ubuntu
+#  become: yes
+#  apt:
+#    name: python3-docker
+#    state: present
+#    update_cache: yes
+
+- name: Check if filebeat container is running
+  become: yes
+  shell: |
+    if [[ $(sudo docker ps| grep 'filebeat_filebeat_1' | wc -l) == 1 ]]; then echo 0 ; else echo 1; fi
+  register: filebeat_container_status
+  ignore_errors: yes
+
+- name: Stop and remove filebeat container if it is running
+  when: filebeat_container_status.stdout == '0'
+  become: yes
+  shell: |
+    sudo docker stop filebeat_filebeat_1 && sudo docker rm filebeat_filebeat_1
+  ignore_errors: yes
+
+- name: 判断本地是否存在docker服务正在运行
+  systemd:
+    name: docker
+    state: started
+  register: docker_service
+  ignore_errors: yes
+
+- name: 判断本地是否存在filebeat服务正在运行
+  systemd:
+    name: filebeat
+    state: started
+  register: filebeat_service
+  ignore_errors: yes
+
+- name: Centos安装filebeat
+  when: is_centos and filebeat_service.state is not defined
+  become: yes
+  shell: |
+    curl -o /tmp/filebeat-8.4.2-x86_64.rpm https://mirrors.rsq.cn/public/pkgs/filebeat-8.4.2-x86_64.rpm
+    sudo rpm -ivh /tmp/filebeat-8.4.2-x86_64.rpm
+    rm -f /tmp/filebeat-8.4.2-x86_64.rpm
+
+- name: Ubuntu安装filebeat
+  when: is_ubuntu and filebeat_service.state is not defined
+  become: yes
+  shell: |
+    curl -o /tmp/filebeat_8.5.3_amd64.deb https://mirrors.rsq.cn/public/pkgs/filebeat_8.5.3_amd64.deb
+    sudo dpkg -i /tmp/filebeat_8.5.3_amd64.deb
+    rm -f /tmp/filebeat_8.5.3_amd64.deb
+
+# 如果本地没有docker服务运行，则收集日志时不用带docker的filebeat.yml模板，否则filebeat服务会启动失败
+- name: 修改filebeat.docker.yml
+  when: docker_service.state is defined
+  become: yes
+  template:
+    src: filebeat.docker.yml.j2
+    dest: '/etc/filebeat/filebeat.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 修改filebeat.yml
+  when: filebeat_service.state is not defined and docker_service.state is not defined
+  become: yes
+  template:
+    src: filebeat.yml.j2
+    dest: '/etc/filebeat/filebeat.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 开启 filebeat system模块
+  when: filebeat_service.state is not defined
+  become: yes
+  template:
+    src: system.yml.j2
+    dest: '/etc/filebeat/modules.d/system.yml'
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 重启filebeat服务并设置开机自启
+  become: yes
+  systemd:
+    name: filebeat
+    state: restarted
+    enabled: yes
