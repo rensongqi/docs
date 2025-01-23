@@ -39,9 +39,9 @@ spec:
               protocol: TCP
           env:
             - name: admin_passwd
-              value: 'C0wa@2o22o8!'
+              value: 'xxxxxxxx'
             - name: consul_token
-              value: '88fc5e3f-5db7-4075-9914-8ae27b64fa62'
+              value: '88fc5e3f-5db7-4075-9914-xxxxxx'
             - name: consul_url
               value: 'http://consul:8500/v1'
             - name: log_level
