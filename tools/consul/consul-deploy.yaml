@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tensuns
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: consul-pv
+  namespace: tensuns
+spec:
+  volumeName: consul-data
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: consul-config
+  namespace: tensuns
+  labels:
+    app: consul
+data:
+  consul.hcl: |+
+    log_level = "error"
+    data_dir = "/consul/data"
+    client_addr = "0.0.0.0"
+    ui_config {
+      enabled = true
+    }
+    ports = {
+      grpc = -1
+      https = -1
+      dns = -1
+      grpc_tls = -1
+      serf_wan = -1
+    }
+    peering {
+      enabled = false
+    }
+    connect {
+      enabled = false
+    }
+    acl = {
+      enabled = true
+      default_policy = "deny"
+      enable_token_persistence = true
+      tokens {
+        initial_management = "88fc5e3f-5db7-4075-9914-8ae27b64fa62"
+        agent = "88fc5e3f-5db7-4075-9914-8ae27b64fa62"
+      }
+    }
+    server = true
+    bootstrap_expect = 1
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: consul
+  namespace: tensuns
+  labels:
+    app: consul
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consul
+  template:
+    metadata:
+      labels:
+        app: consul
+    spec:
+      containers:
+        - name: consul
+          image: 'swr.cn-south-1.myhuaweicloud.com/starsl.cn/consul:latest'
+          args:
+            - agent
+          ports:
+            - name: http
+              containerPort: 8500
+              protocol: TCP
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+          volumeMounts:
+            - name: consul-data
+              mountPath: /consul/data
+            - name: consul-config
+              mountPath: /consul/config/consul.hcl
+              subPath: consul.hcl
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      volumes:
+      - name: consul-config
+        configMap:
+          name: consul-config
+  volumeClaimTemplates:
+    - kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: consul-data
+        namespace: tensuns
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: ibm-spectrum-scale-csi-lt
+        volumeMode: Filesystem
+  serviceName: consul
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consul
+  namespace: tensuns
+  labels:
+    app: consul
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8500
+      targetPort: 8500
+      nodePort: 30085
+  selector:
+    app: consul
+  type: NodePort
