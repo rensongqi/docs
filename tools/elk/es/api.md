@@ -257,3 +257,28 @@ GET test3/_search
   }
 }
 ```
+
+使用 Index Template 设定默认分片数
+```
+PUT _index_template/docker_template
+{
+  "index_patterns": ["docker-*"],   // 匹配所有 docker-* 开头的索引
+  "template": {
+    "settings": {
+      "index.number_of_shards": 5,  // 设置主分片数为 5
+      "index.number_of_replicas": 1 // 设置副本分片数（可调整）
+    }
+  },
+  "priority": 100  // 设定模板优先级，确保不会被其他模板覆盖
+}
+```
+
+Filebeat使用自定义的模板
+```yaml
+// 禁用 Filebeat 自带的模板：
+setup.template.enabled: false
+
+//让 Filebeat 使用你自定义的模板：
+setup.template.name: "docker_template"
+setup.template.pattern: "docker-*"
+```
