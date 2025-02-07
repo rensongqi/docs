@@ -99,6 +99,6 @@ IDE安装`Continue`插件，修改模型为本地模型
 ```
 
 效果示例
-![Llama3.1:8b](../../img/Llama3.18b.jpg)
+![Llama3.1:8b](../../resources/Llama3.18b.jpg)
 
 - slashCommands: 支持快捷操作

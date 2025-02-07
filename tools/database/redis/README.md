@@ -5,81 +5,97 @@ docker-compose.yml
 version: '3'
 services:
   master:
-    image: harbor.rsq.cn/library/redis/redis:6.2.12-alpine3.18
+    image: docker.io/redis:7.4.0-alpine
     container_name: redis-master
     restart: always
-    command: redis-server --port 6379 --requirepass xxxxxxxx  --appendonly yes
+    command: redis-server --port 6379 --requirepass xxxxxxxx --appendonly yes
     ports:
       - 6379:6379
     volumes:
-      - ./data:/data
+      - ./master_data:/data
 
   slave1:
-    image: harbor.rsq.cn/library/redis/redis:6.2.12-alpine3.18
+    image: docker.io/redis:7.4.0-alpine
     container_name: redis-slave-1
     restart: always
-    command: redis-server --slaveof 172.16.104.109 6379 --port 6380  --requirepass xxxxxxxx --masterauth xxxxxxxx  --appendonly yes
+    command: redis-server --slaveof 172.16.90.178 6379 --port 6380 --requirepass xxxxxxxx --masterauth xxxxxxxx --appendonly yes
     ports:
-      - 6379:6379
+      - 6380:6380
     volumes:
-      - ./data:/data
-
+      - ./slave1_data:/data
 
   slave2:
-    image: harbor.rsq.cn/library/redis/redis:6.2.12-alpine3.18
+    image: docker.io/redis:7.4.0-alpine
     container_name: redis-slave-2
     restart: always
-    command: redis-server --slaveof 172.16.104.109 --port 6381  --requirepass xxxxxxxx --masterauth xxxxxxxx  --appendonly yes
+    command: redis-server --slaveof 172.16.90.178 6379 --port 6381 --requirepass xxxxxxxx --masterauth xxxxxxxx --appendonly yes
     ports:
-      - 6379:6379
+      - 6381:6381
     volumes:
-      - ./data:/data
+      - ./slave2_data:/data
 ```
 
 # 2 哨兵
 
-docker-compose.yml
+初始化
+```bash
+mkdir -p /data/redis/sentinel{1..3}
+chmod 777 /data/redis/sentinel
+```
+
+`/data/redis/docker-compose.yml`
 
 ```yml
 version: '3.4'
 services:
   sentinel1:
-    image: harbor.rsq.cn/library/redis/redis:6.2.12-alpine3.18
+    image: docker.io/redis:7.4.0-alpine
     container_name: redis-sentinel-1
+    #user: "0:0"
     ports:
       - 26379:26379
-    command: redis-sentinel /data/sentinel.conf
+    command: redis-sentinel /data/sentinel/sentinel.conf --sentinel --loglevel verbose
     restart: always
     volumes:
-      - ./sentinel.conf:/data/sentinel.conf
+      - ./sentinel1:/data/sentinel
+
   sentinel2:
-    image: harbor.rsq.cn/library/redis/redis:6.2.12-alpine3.18
+    image: docker.io/redis:7.4.0-alpine
     container_name: redis-sentinel-2
     ports:
-      - 26379:26379
-    command: redis-sentinel /data/sentinel.conf
+      - 26380:26379
+    command: redis-sentinel /data/sentinel/sentinel.conf --sentinel
     restart: always
     volumes:
-      - ./sentinel.conf:/data/sentinel.conf
+      - ./sentinel2:/data/sentinel
+
   sentinel3:
-    image: harbor.rsq.cn/library/redis/redis:6.2.12-alpine3.18
+    image: docker.io/redis:7.4.0-alpine
     container_name: redis-sentinel-3
     ports:
-      - 26379:26379
-    command: redis-sentinel /data/sentinel.conf
+      - 26381:26379
+    command: redis-sentinel /data/sentinel/sentinel.conf --sentinel
     restart: always
     volumes:
-      - ./sentinel.conf:/data/sentinel.conf
+      - ./sentinel3:/data/sentinel
 ```
 
-sentinel.conf
+`/data/redis/sentinel{1..3}/sentinel.conf`
+
 ```bash
+bind 0.0.0.0
+daemonize yes
+protected-mode no
 port 26379
-dir "/tmp"
+dir "/data/sentinel"
+pidfile "/var/run/redis-sentinel.pid"
+syslog-enabled no
 sentinel deny-scripts-reconfig yes
-sentinel monitor mymaster 172.16.104.111 6379 2
+sentinel monitor mymaster x.x.x.x 6379 2
 sentinel auth-pass mymaster xxxxxxxx
 ```
+
+[Redis 7.x 哨兵配置](https://juejin.cn/post/7417635848987164687)
 
 # 3 单节点实例
 
@@ -87,7 +103,7 @@ sentinel auth-pass mymaster xxxxxxxx
 version: '3'
 services:
   master:
-    image: harbor.rsq.cn/library/redis/redis:6.2.12-alpine3.18
+    image: docker.io/redis:7.4.0-alpine
     container_name: redis-master
     restart: always
     command: redis-server --port 6379 --requirepass xxxxxxxx  --appendonly yes

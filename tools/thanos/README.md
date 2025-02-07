@@ -7,7 +7,7 @@
 
 # 架构说明
 Thanos架构图：
-![图片](../../img/thanos.png)
+![图片](../../resources/thanos.png)
 
 组件的功能分别是：
 - Sidecar： Thanos 的数据上传组件，用来和 Prometheus 通信，并且将 Prometheus 的监控数据上传到对象存储

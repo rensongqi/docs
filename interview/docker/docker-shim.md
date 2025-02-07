@@ -1,4 +1,4 @@
-![docker-shim](../../img/docker-shim.jpg)
+![docker-shim](../../resources/docker-shim.jpg)
 
 1. Kubelet 通过 CRI 接口（gRPC）调用 dockershim，请求创建一个容器。CRI 即容器运行时接口（Container Runtime Interface），这一步中，Kubelet 可以视作一个简单的 CRI Client，而 dockershim 就是接收请求的 Server。目前 dockershim 的代码其实是内嵌在 Kubelet 中的，所以接收调用的凑巧就是 Kubelet 进程；
 

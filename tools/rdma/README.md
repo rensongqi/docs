@@ -51,13 +51,13 @@ time ./rdma_file 172.17.1.237 record.video.00028
 
 测试效果，对于一个2GB的大文件，可以发现走rdma协议比走TCP协议快了接近2s。
 
-![test](../../img/test.jpg)
+![test](../../resources/test.jpg)
 
 同时也可以发现，走rdma协议基本没有消耗sys的时间，消耗的一点sys时间基本为read文件的时间，通过strace可以跟踪程序执行期间调用的系统调用，分析哪些内核操作消耗了时间。
 
-![strace_rdma](../../img/strace_rdma.jpg)
+![strace_rdma](../../resources/strace_rdma.jpg)
 
-![strace_rsync](../../img/strace_rsync.jpg)
+![strace_rsync](../../resources/strace_rsync.jpg)
 
 注意 `#define MSG_SIZE    1024` MSG_SIZE的大小是决定文件拷贝性能的因素
 
@@ -85,7 +85,7 @@ ibping <server lid port>
 
 ## 工作原理
 
-![rdma](../../img/rdma.png)
+![rdma](../../resources/rdma.png)
 
 **传统**
 - 可以看到传统的方法需要经过用户态->内核->硬件。

@@ -17,7 +17,7 @@
 
 # 2 实现架构
 
-![ld_preload](../../img/ld_preload.png)
+![ld_preload](../../resources/ld_preload.png)
 
 # 3 安装依赖
 
@@ -111,7 +111,7 @@ gcc -o get get.c
 # 配置LD_PRELOAD读
 LD_PRELOAD=inspect_fget.so ./get
 ```
-![openssl sign](../../img/ld_preload_c.png)
+![openssl sign](../../resources/ld_preload_c.png)
 
 
 ## 4.2 Python
@@ -132,7 +132,7 @@ python3 get.py
 # 配置LD_PRELOAD读
 LD_PRELOAD=inspect_fget.so python3 get.py
 ```
-![openssl sign](../../img/ld_preload_python.png)
+![openssl sign](../../resources/ld_preload_python.png)
 
 
 
@@ -164,7 +164,7 @@ cargo run
 # 配置LD_PRELOAD读
 LD_PRELOAD=inspect_fget.so cargo run
 ```
-![openssl sign](../../img/ld_preload_rust.png)
+![openssl sign](../../resources/ld_preload_rust.png)
 
 ## 4.4 Go
 

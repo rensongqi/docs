@@ -130,7 +130,7 @@ client.key-cert.pub:
 ## 2 包签名与离线验签
 ### 2.1 包签名
 
-![openssl sign](../../img/openssl_ca_sign.png)
+![openssl sign](../../resources/openssl_ca_sign.png)
 
 PS：上图中的操作都在客户端进行模拟测试：
 

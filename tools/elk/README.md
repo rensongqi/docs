@@ -8,7 +8,7 @@
 
 # 架构图
 
-![elk](../../img/elk.png)
+![elk](../../resources/elk.png)
 
 # 1 多节点部署ELK
 

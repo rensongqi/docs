@@ -10,7 +10,7 @@ Trim指令也叫disable delete notify(禁用删除通知)，当我们在操作�
 
 而当Windows识别到SSD并确认SSD支持Trim后，在删除数据时，会不向硬盘通知删除指令，只使用Volume Bitmap来记住这里的数据已经删除。Volume Bitmap只是一个磁盘快照，其建立速度比直接读写硬盘去标记删除区域要快得多。这一步就已经省下一大笔时间了。然后再是写入数据的时候，由于NAND闪存保存数据是纯粹的数字形式，因此可以直接根据Volume Bitmap的情况，向快照中已删除的区块写入新的数据，而不用花时间去擦除原本的数据。如果SSD组RAID0后，将失去Trim功能。
 
-![trim](../../img/trim.png)
+![trim](../../resources/trim.png)
 
 SSD Read 和 Write 都以 page 为单位，而清除数据(Erase) 是以 block 为单位的。不过 SSD 的 Write 只能写到空的 page 上，不能像传统机械磁盘那样直接覆盖，修改数据时，操作流程为 read-modify-write：读取原有 page 的内容，在 cache 中修改，写入新的空的 page 中，修改逻辑地址到新的 page ，原有 page 标记为 ‘stale’，并没有清零。
 
