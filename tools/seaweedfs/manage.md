@@ -368,6 +368,13 @@ PUT /.seaweedfs_buckets
 
 # 5 weed shell
 
+> 执行 lock 时如果发现被其他节点已经lock了，确认了其它节点并没有手动执行的lock进程，那么可以找到其他节点当前的登录会话，把这些会话tty踢下线即可
+
+```bash
+w
+pkill -kill -t pts/1
+```
+
 ## 5.1 标记卷只读/读写
 ```bash
 weed shell
@@ -392,10 +399,14 @@ volume.grow -collection collection -count 6 -dataNode 172.16.90.176:8080
 
 `volume.move`
 ```bash
+lock
+
 volume.move -source 172.16.104.124:8080 -target 172.16.90.177:8080 -volumeId 37
 
 # 多条命令执行加 ; 分号即可
 volume.move xxx ; volume.move xxx ; ...
+
+unlock
 ```
 
 `volumeServer.evacuate`
