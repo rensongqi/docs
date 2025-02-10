@@ -9,6 +9,8 @@
     - [2.1.4 172.16.90.173](#214-1721690173)
     - [2.1.5 172.16.90.174](#215-1721690174)
   - [2.2 启动服务](#22-启动服务)
+  - [2.3 额外配置](#23-额外配置)
+    - [2.3.1 配置JWT](#231-配置jwt)
 - [3 挂载](#3-挂载)
 
 # 1 规划
@@ -26,7 +28,7 @@
 
 2、自动分配
 
-Volume可以配置`-max=0`
+Volume可以配置`-max=0`，如果挂载了多块磁盘，可以配置`-max=0,0,0,0`以此类推
 
 主机列表
 
@@ -94,7 +96,7 @@ EOF
 version: '3.8'
 services:
   seaweed-master:
-    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
+    image: chrislusf/seaweedfs:latest
     container_name: seaweedfs-master
     network_mode: host
     restart: always
@@ -112,7 +114,7 @@ services:
       -volumePreallocate
 
   seaweed-volume:
-    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
+    image: chrislusf/seaweedfs:latest
     container_name: seaweedfs-volume
     network_mode: host
     restart: always
@@ -129,12 +131,12 @@ services:
       -port=8080
       -dir=/disk/local_disk1,/disk/local_disk2
       -dir.idx=/weed/metadata
-      -max=14472
+      -max=0,0
       -metricsPort=9998
       -readBufferSizeMB=64
 
   seaweed-filer:
-    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
+    image: chrislusf/seaweedfs:latest
     container_name: seaweedfs-filer
     network_mode: host
     restart: always
@@ -151,7 +153,7 @@ services:
       -metricsPort=9997
 
   seaweed-s3:
-    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
+    image: chrislusf/seaweedfs:latest
     container_name: seaweedfs-s3
     network_mode: host
     restart: always
@@ -171,7 +173,7 @@ services:
 version: '3.8'
 services:
   seaweedfs-master:
-    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
+    image: chrislusf/seaweedfs:latest
     container_name: seaweedfs-master
     network_mode: host
     restart: always
@@ -193,7 +195,7 @@ services:
 version: '3.8'
 services:
   seaweedfs-master:
-    image: harbor.rsq.cn/docker.io/chrislusf/seaweedfs:latest
+    image: chrislusf/seaweedfs:latest
     container_name: seaweedfs-master
     network_mode: host
     restart: always
@@ -225,6 +227,20 @@ docker-compose up -d seaweedfs-filer
 docker-compose up -d seaweedfs-s3
 ```
 
+## 2.3 额外配置
+
+### 2.3.1 配置JWT
+> 文档：https://github.com/seaweedfs/seaweedfs/wiki/Security-Overview#securing-filer-http-with-jwt
+>
+```bash
+vim /data/seaweedfs/config/security.toml
+[jwt.filer_signing.read]
+key = "nX9DCb2SE8T5uTSW"
+expires_after_seconds = 10000
+```
+生成JWT
+> https://github.com/seaweedfs/seaweedfs/blob/6845e253186a8de4b563e069624867dd89785b74/weed/security/jwt.go#L53
+  
 # 3 挂载
 ```bash
 weed -v 4 mount -filer=172.16.90.172:8888 -filer.path=/data -dir=/mnt/weed -cacheDir=/mnt -chunkSizeLimitMB=8 -volumeServerAccess=direct
