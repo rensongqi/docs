@@ -12,6 +12,16 @@ mysqldump -h 172.16.1.104 -u root -p<PASSWORD> --max_allowed_packet=1024M --data
 mysqldump -h 172.16.1.104 -u root -p<PASSWORD> --max_allowed_packet=1024M --single-transaction --databases <DATABASE_NAME> > backup.sql
 ```
 
+仅导出表结构
+```bash
+mysqldump -h 172.16.1.104 -P 13306 -u readonly --single-transaction --no-data -p promise > backup.sql
+```
+
+仅导出INSERT插入数据，不需要drop和create table的语句
+```bash
+mysqldump -h 172.16.1.104 -P 13306 -u readonly --single-transaction --skip-add-drop-table --no-create-info -p promise > backup.sql
+```
+
 ## 还原
 
 ```bash
