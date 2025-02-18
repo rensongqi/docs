@@ -1,5 +1,6 @@
 - [使用lvm根分区扩容](#使用lvm根分区扩容)
 - [lvm合并两块物理磁盘](#lvm合并两块物理磁盘)
+- [还原lvm合并的磁盘](#还原lvm合并的磁盘)
 - [问题记录](#问题记录)
   - [GPT PMBR size mismatch will be corrected by write错误](#gpt-pmbr-size-mismatch-will-be-corrected-by-write错误)
   - [lvextend之后发现扩容的文件系统不对，需要还原](#lvextend之后发现扩容的文件系统不对需要还原)
@@ -212,6 +213,61 @@ sudo nano /etc/fstab
 # 添加以下行
 /dev/vg_data/lv_data /data ext4 defaults 0 0
 
+```
+
+# 还原lvm合并的磁盘
+
+1. 卸载逻辑卷
+```bash
+# 确保没有进程在使用该挂载点
+sudo fuser -km /data
+# 卸载逻辑卷
+sudo umount /data
+```
+
+2. /etc/fstab中删除自动挂载项
+```bash
+# 删除包含目标逻辑卷的数据行
+```
+
+3. 删除逻辑卷(LV)
+
+```bash
+# 查看逻辑卷
+sudo lvs
+# 删除逻辑卷
+sudo lvremove /dev/vg_data/lv_data
+# 确认删除时输入y
+```
+
+4. 删除卷组(VG)
+```bash
+# 查看卷组
+sudo vgs
+# 删除卷组
+sudo vgremove vg_data
+```
+
+5. 删除物理卷(PV)
+```bash
+# 查看物理卷
+sudo pvs
+# 删除物理卷
+sudo pvremove /dev/sda1
+sudo pvremove /dev/sdb1
+```
+
+6. 清除硬盘分区表
+```bash
+# 对sda进行操作
+sudo fdisk /dev/sda
+# 输入d删除分区
+# 输入w保存并退出
+
+# 对sdb进行操作
+sudo fdisk /dev/sdb
+# 输入d删除分区
+# 输入w保存并退出
 ```
 
 # 问题记录
