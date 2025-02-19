@@ -1,5 +1,6 @@
 - [使用lvm根分区扩容](#使用lvm根分区扩容)
 - [lvm合并两块物理磁盘](#lvm合并两块物理磁盘)
+- [B盘合并至有数据的A盘(parted)](#b盘合并至有数据的a盘parted)
 - [还原lvm合并的磁盘](#还原lvm合并的磁盘)
 - [问题记录](#问题记录)
   - [GPT PMBR size mismatch will be corrected by write错误](#gpt-pmbr-size-mismatch-will-be-corrected-by-write错误)
@@ -213,6 +214,33 @@ sudo nano /etc/fstab
 # 添加以下行
 /dev/vg_data/lv_data /data ext4 defaults 0 0
 
+```
+
+# B盘合并至有数据的A盘(parted)
+
+```bash
+# 分区
+parted /dev/sdb 
+(parted) mklabel gpt            # GPT（即GUID分区表） ， 突破MBR 4个主分区限制
+(parted) mkpart p 0% 100%       #主分区
+(parted) print
+(parted) toggle 1 lvm           #将分区打上lvm标签 
+(parted) print               
+(parted) q
+partprobe    # 重读分区表
+
+# 创建pv、vg和lv
+pvcreate /dev/sdb1
+pvs
+vgcreate vg_data /dev/sdb1
+vgs
+sudo lvcreate -l 100%VG -n lv_data vg_data
+lvs
+mkfs.xfs /dev/vg_data/lv_data
+
+# 挂载
+mkdir /data
+mount /dev/vg_data/lv_data /data/
 ```
 
 # 还原lvm合并的磁盘
