@@ -218,13 +218,16 @@ sudo nano /etc/fstab
 
 # B盘合并至有数据的A盘(parted)
 
+> /dev/sdc 合并至 /dev/sdb
+
+模拟数据，对/dev/sdb格式化并写入测试数据
 ```bash
 # 分区
 parted /dev/sdb 
 (parted) mklabel gpt            # GPT（即GUID分区表） ， 突破MBR 4个主分区限制
-(parted) mkpart p 0% 100%       #主分区
+(parted) mkpart p 0% 100%       # 主分区
 (parted) print
-(parted) toggle 1 lvm           #将分区打上lvm标签 
+(parted) toggle 1 lvm           # 将分区打上lvm标签 
 (parted) print               
 (parted) q
 partprobe    # 重读分区表
@@ -241,6 +244,25 @@ mkfs.xfs /dev/vg_data/lv_data
 # 挂载
 mkdir /data
 mount /dev/vg_data/lv_data /data/
+```
+
+格式化 /dev/sdc
+
+```bash
+# 分区
+parted /dev/sdc
+(parted) mklabel gpt            # GPT（即GUID分区表） ， 突破MBR 4个主分区限制
+(parted) mkpart p 0% 100%       # 主分区
+(parted) print
+(parted) toggle 1 lvm           # 将分区打上lvm标签 
+(parted) print               
+(parted) q
+partprobe    # 重读分区表
+
+pvcreate /dev/sdc1                # 创建pv
+vgextend vg_data /dev/sdc1        # 把sdc添加上此前创建的vg中
+lvextend -l +100%FREE /dev/mapper/vg_data-lv_data    # 扩展lv
+resize2fs /dev/mapper/vg_data-lv_data   # 在线对逻辑卷进行调整
 ```
 
 # 还原lvm合并的磁盘
