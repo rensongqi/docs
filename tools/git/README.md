@@ -7,6 +7,7 @@
 - [7 git 免秘钥pull push](#7-git-免秘钥pull-push)
 - [8 git pull代码至指定目录下](#8-git-pull代码至指定目录下)
 - [9 git 设置 proxy](#9-git-设置-proxy)
+- [10 git 忽略 .idea文件](#10-git-忽略-idea文件)
 
 # 1 git分支操作
 ```bash
@@ -158,3 +159,14 @@ git config --global https.proxy https://127.0.0.1:7890
 git config --global --unset http.proxy
 git config --global --unset https.proxy
 ```
+
+# 10 git 忽略 .idea文件
+
+> 若.idea没有被git跟踪，则直接在.gitignore文件中添加.idea
+> 
+> 若.idea已经被git跟踪，之后再加入.gitignore后是没有作用的，需要清除.idea的git缓存
+
+```bash
+git rm -r --cached .idea
+```
+然后在.gitignore中添加.idea

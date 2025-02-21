@@ -4,7 +4,7 @@
   - [1.2 Kafka](#12-kafka)
   - [1.3 Logstash](#13-logstash)
   - [1.4 Filebeat](#14-filebeat)
-- [2 单节点部署ES](#2-单节点部署es)
+- [2 单节点部署ES（带密码）](#2-单节点部署es带密码)
 
 # 架构图
 
@@ -223,7 +223,7 @@ output.kafka:
   max_message_bytes: 1000000
 ```
 
-# 2 单节点部署ES
+# 2 单节点部署ES（带密码）
 需要账号密码管理的es
 
 `config/elasticsearch.yml`
@@ -257,7 +257,7 @@ version: '3.7'
 services:
   elasticsearch:
     image: docker.io/elasticsearch:7.17.25
-    container_name: fs-es
+    container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms5000m -Xmx5000m
@@ -269,14 +269,14 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - ./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
       - ./certs:/usr/share/elasticsearch/certs
-      - /elk/fs-es:/usr/share/elasticsearch/data
+      - /elk/data:/usr/share/elasticsearch/data
     networks:
       - es-net
 
   kibana:
     image: docker.io/kibana:7.17.25
     hostname: kibana
-    container_name: fs-kibana
+    container_name: kibana
     volumes: 
       - ./config/kibana.yml:/usr/share/kibana/config/kibana.yml
     ports:
@@ -290,4 +290,20 @@ services:
 networks:
   es-net:
     driver: bridge
+```
+
+启动容器
+
+```bash
+docker-compose up -d elasticsearch
+
+# 进入容器创建初始密码
+docker exec -it elasticsearch bash
+
+# interactive: 手动指定密码
+# auto: 随机生成密码
+./bin/elasticsearch-setup-passwords interactive
+
+# 重启容器后生效
+docker-compose restart elasticsearch
 ```
