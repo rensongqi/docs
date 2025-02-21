@@ -443,6 +443,18 @@ es-hot-node1  hot_warm        hot
 }
 ```
 
+使用API给index配置lifecycle
+```
+PUT my_index-*/_settings
+{
+  "index": {
+    "lifecycle": {
+      "name": "log_policy"
+    }
+  }
+}
+```
+
 配置index lifecycle policy
 
 

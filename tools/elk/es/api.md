@@ -10,6 +10,41 @@ GET ${exampleVariable1} // _search
   }
 }
 
+# 查看集群健康状态
+GET /_cluster/health
+
+# reindex，类似拷贝index
+POST _reindex
+{
+  "source": {
+    "index": "system-2025.01.17"
+  },
+  "dest": {
+    "index": "system-2025.01.14"
+  }
+}
+
+# 创建模板
+PUT _index_template/kubernetes_template
+{
+  "index_patterns": ["kubernetes-*"],
+  "template": {
+    "settings": {
+      "index.number_of_shards": 5,
+      "index.number_of_replicas": 1
+    }
+  },
+  "priority": 100
+}
+
+# 取消配置，如下所示，值为null即可
+PUT _cluster/settings
+{
+  "persistent": {
+    "cluster.routing.allocation.awareness.attributes": null
+  }
+}
+
 # 创建一个指定类型的index
 PUT test2
 {
