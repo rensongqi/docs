@@ -410,11 +410,14 @@ es-hot-node1  hot_warm        hot
 
 集群通过`hot_warm`属性来制定`allocation.awareness`的规则
 
+- [官方文档](https://www.elastic.co/guide/en/elasticsearch/reference/8.17/modules-cluster.html#cluster-routing-settings)
+
 `PUT _cluster/settings`
 ```
 {
   "persistent": {
-    "cluster.routing.allocation.awareness.attributes": "hot_warm"
+    "cluster.routing.allocation.awareness.attributes": "hot_warm",
+    "cluster.routing.allocation.include.hot_warm": "hot"
   }
 }
 ```
