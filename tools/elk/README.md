@@ -224,7 +224,7 @@ output.kafka:
 ```
 
 # 2 单节点部署ES（带密码）
-需要账号密码管理的es
+> 需要账号密码管理的es，版本为 elasticsearch7.x
 
 `config/elasticsearch.yml`
 ```bash

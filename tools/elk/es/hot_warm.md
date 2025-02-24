@@ -443,7 +443,7 @@ es-hot-node1  hot_warm        hot
 }
 ```
 
-使用API给index配置lifecycle
+使用API给index配置lifecycle（支持批量操作）
 ```
 PUT my_index-*/_settings
 {
