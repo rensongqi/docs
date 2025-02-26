@@ -14,6 +14,7 @@
       - [禁止ip或ip网段](#禁止ip或ip网段)
       - [屏蔽IP的方法](#屏蔽ip的方法)
 - [Lua](#lua)
+- [手动容器编译openresty支持slice模块](#手动容器编译openresty支持slice模块)
 
 # Nginx 模板
 
@@ -328,3 +329,12 @@ deny all;
 # Lua
 
 - [lua-resty-http](https://github.com/ledgetech/lua-resty-http)
+
+# 手动容器编译openresty支持slice模块
+
+[Dockerfile](./Dockerfile)
+
+参考文章：
+- [Dockerfile 编写openresty 支持slice模块切片回源](http://www.xixicool.com/884.html)
+- [Centos7编译openssl 3.0.x](https://blog.csdn.net/qq_42020376/article/details/143949796)
+
