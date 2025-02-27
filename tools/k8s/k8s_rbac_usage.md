@@ -6,7 +6,9 @@
 - **User account**是为人设计的，而ServiceAccount则是为了Pod中的进程，此外User Account是跨Namespace的，而ServiceAccount则是仅局限它所在的Namespace
 
 ![RBAC](../../resources/rbac.png)
+
 如上图所示，在不同名称空间中，我们需要有一个Role，此Role定义了User访问此名称空间的权限，如GET、WATCH、LIST等，通过RoleBinding，使得Role和User进行关联，从而授权User具有相关资源的访问权限，这样就是一个`Role/RoleBinding`。但是刚才说的只是针对当前名称空间的绑定授权，那如果一个Role想要具有访问整个集群的权限，这个时候就需要使用到`ClusterRole`和`ClusterRoleBinding`了。
+
 **示例说明：** 
 
 - 上图User1如果通过`ClusterRoleBing`和`ClusterRole`进行了绑定，那么User1就具有了集群所有的访问权限
