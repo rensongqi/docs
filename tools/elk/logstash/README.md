@@ -47,6 +47,20 @@
     echo "root - nofile 102400" >> /etc/security/limits.d/nofile.conf
     ```
 
+3. 安装插件
+
+    ```bash
+    /usr/share/logstash/bin/logstash-plugin install logstash-filter-multiline
+    ```
+
+4. 升级logstash
+
+    > [官方下载地址](https://www.elastic.co/downloads/past-releases/logstash-8-17-2)
+
+    ```bash
+    yum install logstash-8.17.2-x86_64.rpm
+    ```
+
 # 日志解析案例
 
 背景描述
