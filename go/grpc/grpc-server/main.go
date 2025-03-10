@@ -33,8 +33,7 @@ func FsContent() string {
 
 func (s *Server) SendFSMessageToUser(ctx context.Context, req *pb.UserRequest) (*pb.UserResponse, error) {
 	cli := lark.New(
-		lark.WithAppCredential("cli_a228448b037ed00d", "xyRevQ1Z069gCnXA3RyBnftyFSVmj8hn"),
-		//lark.WithAppCredential("cli_a36dfb87beb8900d", "UysnvQLnaYdHIEYt8wdhCcniQXxK4PZw"),
+		lark.WithAppCredential("cli_a228448bxxxxxxx", "xyRevQ1Z069xxxxxxx"),
 	)
 
 	for _, userId := range req.UserIds {
