@@ -1,13 +1,19 @@
 # 1 gRPC
 
+- [官方手册](https://grpc.io/docs/languages/go/quickstart/)
+
 ## 1.1 安装protoc及protoc-gen-go
 
-```go
+```bash
 //1、安装转换文件protoc
 https://github.com/protocolbuffers/protobuf/releases
 
-//2、安装protoc-gen-go
-go get -u github.com/golang/protobuf/protoc-gen-go
+//2、安装protoc-gen-go和protoc-gen-go-grpc
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+# 导入系统环境变量
+export PATH="$PATH:$(go env GOPATH)/bin"
 ```
 
 下边创建一个简单的server端和client端，实现两者之间的交互
@@ -35,7 +41,7 @@ go get -u github.com/golang/protobuf/protoc-gen-go
 // 指定的当前proto语法的版本，有2和3
 syntax = "proto3";
 // 指定等会文件生成出来的package
-option go_package = "../services";
+option go_package = ".;../services";
 // 定义request model
 message ProductRequest{
   int32 prod_id = 1; // 1代表顺序
@@ -54,7 +60,7 @@ service ProdService{
 2. 生成protobuf中间文件（Prod.pb.go）
 
 ```bash
-protoc --go_out=plugins=grpc:"../services" Prod.proto
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative helloworld/Prod.proto
 ```
 
 3. services层编写商品服务（ProdService.go）

@@ -1,0 +1,46 @@
+// 使用proto3语法
+syntax = "proto3";
+
+// .表示当前位置，根目录    service是包名
+/*这部分的内容是关于最后生成的go文件是处在哪个目录哪个包.代表在当前目录生成.service代表了牛成的go文件的包名是service,*/
+option go_package = ".;service";
+
+//定义服务
+//然后我们需要定义一个服务，在这个服务中需要有一个方法，这个方法可以接收客户端的参数，再返回服务端的响应
+//其实很容易可以看出，我们定义了一个service，称为SayHello，这个服务中有一个rpc方法，名为SayHello
+//它将发送一个 HelloRequest 类型的请求消息，并期望服务器返回一个 HelloResponse 类型的响应消息。
+service SayHello {
+  rpc SayHello(HelloRequest) returns (HelloResponse) {}
+  rpc PrintSum(PrintSumRequest) returns (PrintSumResponse) {}
+  rpc SendFSMessageToUser(UserRequest) returns (UserResponse) {}
+}
+
+//类似与结构体
+message HelloRequest {
+  //1标识号，每多一个需要自动累加（范围是1-2^29 - 1），这个就会生成在message的第一个位置；
+  string requestName = 1;
+  //字符串切片
+  repeated string height = 2;
+}
+
+message HelloResponse {
+  string responseMsg = 1;
+}
+
+// PrintSum func
+message PrintSumRequest {
+  int64 num = 1;
+}
+
+message PrintSumResponse {
+  repeated int64 nums = 1;
+}
+
+// Send
+message UserRequest {
+  repeated string userIds = 1;
+}
+
+message UserResponse {
+  string res = 1;
+}
