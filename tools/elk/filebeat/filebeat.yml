@@ -1,0 +1,112 @@
+# ============================== Filebeat modules ==============================
+
+filebeat.config.modules:
+  # Glob pattern for configuration loading
+  path: ${path.config}/modules.d/*.yml
+  # Set to true to enable config reloading
+  reload.enabled: true
+  # Period on which files under path should be checked for changes
+  reload.period: 10s
+# ============================== Filebeat inputs ===============================
+
+filebeat.inputs:
+- type: kafka
+  hosts:
+    - 172.16.100.67:9092
+  topics: ["rensongqi"]
+  fields:
+    topic: "rensongqi-syslog"
+  group_id: "filebeat"
+  parsers:
+    - multiline:
+        pattern: "^(I|E|W|F|D)\\d{6}"
+        negate: true
+        match: after
+  processors:
+    - dissect:
+        tokenizer: "/%{?}/%{?}/%{year}/%{?}/%{?}/%{carname}/%{hostname}/%{version}/%{logfileprefix}"
+        field: "kafka.key"
+        target_prefix: ""
+    - dissect:
+        tokenizer: "%{logfile}.%{?}"
+        field: "logfileprefix"
+        target_prefix: ""
+    - script:
+        lang: javascript
+        source: >
+          function process(event) {
+            var msg = event.Get("message");
+            if (msg) {
+              if (event.Get("logfile") === "syslog" || event.Get("logfile") === "auth") {
+                event.Put("logtime", msg.substring(0, 3) + " " + msg.substring(4, 6) + " " + msg.substring(7, 15) + " " + event.Get("year"));
+              } else if (event.Get("logfile")) {
+                event.Put("logtime", "20" + msg.substring(1, 7) + "T" + msg.substring(8, 16) + "." + msg.substring(17, 23) + "Z");
+                event.Put("level", msg.substring(0, 1));
+              }
+            }
+          }
+          function process(event) {
+            var lines = event.Get("message").split('\n');
+            var events = [];
+            lines.forEach(function(line) {
+              var newEvent = event.Clone();
+              newEvent.Put("message", line.trim());
+              events.push(newEvent);
+            });
+            return events;
+          }
+    - replace:
+        when:
+          equals:
+            fields.log_type: "carlog"
+        fields: 
+          - field: "level"
+            pattern: "I"
+            replacement: "info"
+          - field: "level"
+            pattern: "E"
+            replacement: "error"
+          - field: "level"
+            pattern: "W"
+            replacement: "warn"
+          - field: "level"
+            pattern: "D"
+            replacement: "debug"
+          - field: "level"
+            pattern: "F"
+            replacement: "fatal"
+
+    - timestamp:
+        field: "logtime"
+        timezone: "Asia/Shanghai"
+        layouts:
+          # 不支持 20060102 15:04:05:999999 这种格式  需要改为20060102 15:04:05.999999
+          - "Jan 2 15:04:05 2006"
+          - '20060102T15:04:05.000000Z'
+        test:
+          - 'May 9 17:27:27 2024'
+          - '20250115T15:02:44.332389Z'
+
+# =================================== Kibana ===================================
+
+setup.kibana:
+    host: "172.16.100.107:5601"
+
+# ================================== Outputs ===================================
+output.kafka:
+  # initial brokers for reading cluster metadata
+  hosts: ["172.16.100.107:9092", "172.16.100.108:9092", "172.16.100.109:9092"]
+  topic: '%{[fields.topic]}'
+  partition.round_robin:
+    reachable_only: false
+  required_acks: 1
+  compression: gzip
+  max_message_bytes: 1000000
+
+
+output.elasticsearch:
+  hosts: ["172.16.100.107:9200", "172.16.100.108:9200", "172.16.100.109:9200"]
+  index: "%{[fields.topic]}-%{+yyyy.MM.dd}"
+
+setup.template.name: "rensongqi"
+setup.template.pattern: "rensongqi-*"

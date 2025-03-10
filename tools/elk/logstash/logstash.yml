@@ -1,0 +1,132 @@
+input {
+    file{
+        path => "/disk/upload/devops/vehicle-stubs/\$Logger/20*/**/**/[A-T]*/**/v*/*.log.*"
+        exclude => "syslog.log.*"
+        type => "stublogger"
+        sincedb_path => "/dev/null"
+        file_completed_action => "log_and_delete"
+        file_completed_log_path => "/var/log/carlog/delete.log"
+        max_open_files => 10000
+        mode => "read"
+    }
+}
+
+input {
+    file{
+        path => "/disk/upload/devops/vehicle-stubs/\$Logger/20*/**/**/[A-T]*/**/v*/syslog.log.*"
+        type => "syslog-stublogger"
+        sincedb_path => "/dev/null"
+        file_completed_action => "log_and_delete"
+        file_completed_log_path => "/var/log/carlog/delete.log"
+        max_open_files => 10000
+        mode => "read"
+    }
+}
+
+filter {
+    if [hostname] =~ /^v/ {
+     drop {}
+    }
+    if [type] == "stublogger" {
+        ruby {
+            code => "
+                path = event.get('log')['file']['path']
+                event.set('logfilepath', path.split('/'))
+                logfileprefix = path.split('/')[12]
+                prefix = logfileprefix.split('.').first(2).join('.')
+                event.set('logfile', prefix) 
+            "
+        }
+        multiline {
+            pattern => "^(I|E|W|F|D)\d{6}"
+            negate => true
+            what => "previous"
+        }
+        grok {
+            match => {
+                "message" => "^(?<level>[IEWFD]).{0}(?<msg>.{19})"
+            }
+            tag_on_failure => ["grok_failure"]
+        }
+        mutate {
+            gsub => [ "level", "I", "info" ]
+            gsub => [ "level", "E", "error" ]
+            gsub => [ "level", "W", "warn" ]
+            gsub => [ "level", "F", "fatal" ]
+            gsub => [ "level", "D", "debug" ]
+            add_field => { 
+                "logtime" => "20%{msg}"
+                "carname" => "%{[logfilepath][9]}"
+                "hostname" => "%{[logfilepath][10]}"
+                "version" => "%{[logfilepath][11]}"
+                "oss" => "http://ossapi.cowarobot.cn:9000/vehicle-stubs/$Logger/%{[logfilepath][6]}/%{[logfilepath][7]}/%{[logfilepath][8]}/%{[logfilepath][9]}/%{[logfilepath][10]}/%{[logfilepath][11]}/%{[logfilepath][12]}"
+            }
+            convert => {
+                "carname" => "string"
+                "hostname" => "string"
+                "logfile" => "string"
+                "version" => "string"
+            }
+        }
+        date {
+            match => ["logtime","YYYYMMdd HH:mm:ss:SSS"]
+            target => "@timestamp"
+            remove_field => [ "logfilepath", "msg", "logtime", "event", "log", "host"] 
+        }
+    }
+
+    if [type] == "syslog-stublogger" {
+        ruby {
+            code => "
+                path = event.get('log')['file']['path']
+                event.set('logfilepath', path.split('/'))
+                logfileprefix = path.split('/')[12]
+                prefix = logfileprefix.split('.').first(2).join('.')
+                event.set('logfile', prefix) 
+            "
+        }
+        grok {
+            match => { "message" => "%{MONTH:log_month}%{SPACE}%{MONTHDAY:log_day}%{SPACE}%{TIME:log_time}" }
+            tag_on_failure => ["grok_failure"]
+        }
+        mutate {
+            add_field => { 
+                "carname" => "%{[logfilepath][9]}"
+                "hostname" => "%{[logfilepath][10]}"
+                "version" => "%{[logfilepath][11]}"
+                "oss" => "http://ossapi.cowarobot.cn:9000/vehicle-stubs/$Logger/%{[logfilepath][6]}/%{[logfilepath][7]}/%{[logfilepath][8]}/%{[logfilepath][9]}/%{[logfilepath][10]}/%{[logfilepath][11]}/%{[logfilepath][12]}"
+                "log_timestamp" => "%{log_month} %{log_day} %{log_time} 2025"
+                "level" => "info"
+            }
+            convert => {
+                "carname" => "string"
+                "hostname" => "string"
+                "logfile" => "string"
+                "version" => "string"
+            }
+        }
+        date {
+            match => ["log_timestamp","MMM dd HH:mm:ss yyyy"]
+            target => "@timestamp"
+            remove_field => ["logfilepath", "log_month", "log_day", "log_time", "log_timestamp", "log", "event", "host", "msg"] 
+            tag_on_failure => ["date_failure"]
+        }
+    }
+    if "grok_failure" in [tags] {
+        drop { }
+    }
+    if "_dateparsefailure" in [tags] {
+        drop { }
+    }
+    if "date_failure" in [tags] {
+        drop { }
+    }
+}
+
+output {
+    elasticsearch {
+        hosts => ["172.16.100.107:9200", "172.16.100.108:9200", "172.16.100.109:9200"]
+        index => "stublogger-%{+YYYY.MM.dd}"
+        action => "create"
+    }
+}

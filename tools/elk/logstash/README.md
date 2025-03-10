@@ -1,4 +1,7 @@
 
+- [修改logstash配置](#修改logstash配置)
+- [日志解析案例](#日志解析案例)
+
 # 修改logstash配置
 
 1. 修改启动内存参数
@@ -72,134 +75,19 @@
 - `file_completed_action` 默认值为 `delete` ，需要`mode`的模式为`read`时才生效
 - `file_completed_log_path` 记录删除的文件绝对路径，需要对该文件具有写入的权限
 
+配置文件参考
+
+初始化
+```bash
+# 创建日志输出目录
+mkdir /var/log/carlog/
+chmdo 777 /var/log/carlog/
+
+# 修改新写入日志文件权限，或者将logstash启动用户改为root，否则logstash将无权限读完文件后删除日志文件
+vim /lib/systemd/system/logstash.service
+[Service]
+User=root
+Group=root
 ```
-input {
-    file{
-        path => "/vehicle-stubs/\$Logger/20*/**/**/**/**/v*/*.log.*"
-        exclude => "syslog.log.*"
-        type => "stublogger"
-        sincedb_path => "/dev/null"
-        file_completed_action => "delete"
-        file_completed_log_path => "/etc/logstash/delete.log"
-        max_open_files => 10000
-        mode => "read"
-    }
-}
 
-input {
-    file{
-        path => "/vehicle-stubs/\$Logger/20*/**/**/**/**/v*/syslog.log.*"
-        type => "syslog-stublogger"
-        sincedb_path => "/dev/null"
-        file_completed_action => "delete"
-        max_open_files => 10000
-        mode => "read"
-    }
-}
-
-filter {
-    if [type] == "stublogger" {
-        ruby {
-            code => "
-                path = event.get('log')['file']['path']
-                event.set('logfilepath', path.split('/'))
-                logfileprefix = path.split('/')[9]
-                prefix = logfileprefix.split('.').first(2).join('.')
-                event.set('logfile', prefix) 
-            "
-        }
-        multiline {
-            pattern => "^(I|E|W|F|D)\d{6}"
-            negate => true
-            what => "previous"
-        }
-        grok {
-            match => {
-                "message" => "^(?<level>[IEWFD]).{0}(?<msg>.{19})"
-            }
-            tag_on_failure => ["grok_failure"]
-        }
-        mutate {
-            gsub => [ "level", "I", "info" ]
-            gsub => [ "level", "E", "error" ]
-            gsub => [ "level", "W", "warn" ]
-            gsub => [ "level", "F", "fatal" ]
-            gsub => [ "level", "D", "debug" ]
-            add_field => { 
-                "logtime" => "20%{msg}"
-                "carname" => "%{[logfilepath][6]}"
-                "hostname" => "%{[logfilepath][7]}"
-                "version" => "%{[logfilepath][8]}"
-                "oss" => "http://ossapi.rsq.cn:9000/vehicle-stubs-bak/$Logger/%{[logfilepath][3]}/%{[logfilepath][4]}/%{[logfilepath][5]}/%{[logfilepath][6]}/%{[logfilepath][7]}/%{[logfilepath][8]}/%{[logfilepath][9]}"
-            }
-            convert => {
-                "carname" => "string"
-                "hostname" => "string"
-                "logfile" => "string"
-                "version" => "string"
-            }
-        }
-        date {
-            match => ["logtime","YYYYMMdd HH:mm:ss:SSS"]
-            target => "@timestamp"
-            remove_field => [ "logfilepath", "msg", "logtime", "event", "log", "host"] 
-        }
-    }
-
-    if [type] == "syslog-stublogger" {
-        ruby {
-            code => "
-                path = event.get('log')['file']['path']
-                event.set('logfilepath', path.split('/'))
-                logfileprefix = path.split('/')[9]
-                prefix = logfileprefix.split('.').first(2).join('.')
-                event.set('logfile', prefix) 
-            "
-        }
-        grok {
-            match => { "message" => "%{MONTH:log_month}%{SPACE}%{MONTHDAY:log_day}%{SPACE}%{TIME:log_time}" }
-            tag_on_failure => ["grok_failure"]
-        }
-        mutate {
-            add_field => { 
-                "carname" => "%{[logfilepath][6]}"
-                "hostname" => "%{[logfilepath][7]}"
-                "version" => "%{[logfilepath][8]}"
-                "oss" => "http://ossapi.rsq.cn:9000/vehicle-stubs-bak/$Logger/%{[logfilepath][3]}/%{[logfilepath][4]}/%{[logfilepath][5]}/%{[logfilepath][6]}/%{[logfilepath][7]}/%{[logfilepath][8]}/%{[logfilepath][9]}"
-                "log_timestamp" => "%{log_month} %{log_day} %{log_time} 2024"
-                "level" => "info"
-            }
-            convert => {
-                "carname" => "string"
-                "hostname" => "string"
-                "logfile" => "string"
-                "version" => "string"
-            }
-        }
-        date {
-            match => ["log_timestamp","MMM dd HH:mm:ss yyyy"]
-            target => "@timestamp"
-            remove_field => ["logfilepath", "log_month", "log_day", "log_time", "log_timestamp", "log", "event", "host", "msg"] 
-            tag_on_failure => ["date_failure"]
-        }
-    }
-    if "grok_failure" in [tags] {
-        drop { }
-    }
-    if "_dateparsefailure" in [tags] {
-        drop { }
-    }
-    if "date_failure" in [tags] {
-        drop { }
-    }
-
-}
-
-output {
-    elasticsearch {
-        hosts => ["172.16.100.107:9200", "172.16.100.108:9200", "172.16.100.109:9200"]
-        index => "stublogger-%{+YYYY.MM.dd}"
-        action => "create"
-    }
-}
-```
+[logstash.yml](./logstash.yml)
