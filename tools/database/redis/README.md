@@ -54,7 +54,7 @@ services:
     container_name: redis-replica2
     image: redis:7.4.0-alpine
     volumes:
-      - ./slave1_data:/data
+      - ./slave2_data:/data
     ports:
       - "7003:6379"
     command: redis-server --slaveof 172.30.1.2 6379 --port 6379 --requirepass xxxxxxxx --masterauth xxxxxxxx --appendonly yes --protected-mode no
@@ -129,6 +129,20 @@ docker-compose up -d redis-replica2
 docker-compose up -d redis-sentinel1
 docker-compose up -d redis-sentinel2
 docker-compose up -d redis-sentinel3
+```
+
+从RDB数据恢复
+
+1. 先停掉所有redis节点
+2. 把rdb数据拷贝到Master节点的数据目录后启动redis-master，等待数据从磁盘加载至内存中
+3. 启动redis-replica1和redis-replica2节点，同步规则是one by one，先同步其中一个replica节点，同步完成后再同步另一个replica
+4. 如果两个节点启动后没有自动从master同步数据，可以手动执行如下命令
+
+```bash
+/data # redis-cli -h 172.30.1.4 -p 6379 -a <PASSWORD> SLAVEOF NO ONE
+OK
+/data # redis-cli -h 172.30.1.4 -p 6379 -a <PASSWORD> SLAVEOF 172.30.1.2 6379
+OK Already connected to specified master
 ```
 
 参考文章
