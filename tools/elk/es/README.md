@@ -50,7 +50,7 @@ version: '3.7'
 
 services:
   elasticsearch:
-    image: harbor.cowarobot.cn/docker.io/elasticsearch:8.17.2
+    image: elasticsearch:8.17.2
     container_name: elasticsearch
     restart: always
     environment:
@@ -94,7 +94,7 @@ version: '3.7'
 
 services:
   elasticsearch:
-    image: harbor.cowarobot.cn/docker.io/elasticsearch:8.17.2
+    image: elasticsearch:8.17.2
     container_name: elasticsearch
     restart: always
     environment:
@@ -112,7 +112,7 @@ services:
       - elk
 
   kibana:
-    image: harbor.cowarobot.cn/docker.io/kibana:8.17.2
+    image: kibana:8.17.2
     hostname: kibana
     container_name: kibana
     volumes: 

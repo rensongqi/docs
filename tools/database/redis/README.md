@@ -1,103 +1,142 @@
 
-# 1 主从配置
-docker-compose.yml
-```yml
-version: '3'
-services:
-  master:
-    image: docker.io/redis:7.4.0-alpine
-    container_name: redis-master
-    restart: always
-    command: redis-server --port 6379 --requirepass xxxxxxxx --appendonly yes
-    ports:
-      - 6379:6379
-    volumes:
-      - ./master_data:/data
-
-  slave1:
-    image: docker.io/redis:7.4.0-alpine
-    container_name: redis-slave-1
-    restart: always
-    command: redis-server --slaveof 172.16.90.178 6379 --port 6380 --requirepass xxxxxxxx --masterauth xxxxxxxx --appendonly yes
-    ports:
-      - 6380:6380
-    volumes:
-      - ./slave1_data:/data
-
-  slave2:
-    image: docker.io/redis:7.4.0-alpine
-    container_name: redis-slave-2
-    restart: always
-    command: redis-server --slaveof 172.16.90.178 6379 --port 6381 --requirepass xxxxxxxx --masterauth xxxxxxxx --appendonly yes
-    ports:
-      - 6381:6381
-    volumes:
-      - ./slave2_data:/data
-```
-
-# 2 哨兵
+# 1 Redis主从 + 哨兵配置
 
 初始化
+
 ```bash
 mkdir -p /data/redis/sentinel{1..3}
+mkdir -p /data/redis/{master_data,slave1_data,slave2_data}
 chmod 777 /data/redis/sentinel
 ```
 
-`/data/redis/docker-compose.yml`
+> 注意需要手动修改 xxxxxxxx 为自定义的密码
 
+`/data/redis/docker-compose.yml`
 ```yml
-version: '3.4'
+version: '3.8'
+
+networks:
+  redis-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.1.0/24
+
 services:
-  sentinel1:
-    image: docker.io/redis:7.4.0-alpine
-    container_name: redis-sentinel-1
-    #user: "0:0"
+  redis-master:
+    container_name: redis-master
+    image: redis:7.4.0-alpine
+    volumes:
+      - ./master_data:/data
     ports:
-      - 26379:26379
-    command: redis-sentinel /data/sentinel/sentinel.conf --sentinel --loglevel verbose
-    restart: always
+      - "7001:6379"
+    command: redis-server --port 6379 --requirepass xxxxxxxx --appendonly yes --protected-mode no
+    networks:
+      redis-network:
+        ipv4_address: 172.30.1.2
+
+  redis-replica1:
+    container_name: redis-replica1
+    image: redis:7.4.0-alpine
+    volumes:
+      - ./slave1_data:/data
+    ports:
+      - "7002:6379"
+    command: redis-server --slaveof 172.30.1.2 6379 --port 6379 --requirepass xxxxxxxx --masterauth xxxxxxxx --appendonly yes --protected-mode no
+    depends_on:
+      - redis-master
+    networks:
+      redis-network:
+        ipv4_address: 172.30.1.3
+
+  redis-replica2:
+    container_name: redis-replica2
+    image: redis:7.4.0-alpine
+    volumes:
+      - ./slave1_data:/data
+    ports:
+      - "7003:6379"
+    command: redis-server --slaveof 172.30.1.2 6379 --port 6379 --requirepass xxxxxxxx --masterauth xxxxxxxx --appendonly yes --protected-mode no
+    depends_on:
+      - redis-master
+    networks:
+      redis-network:
+        ipv4_address: 172.30.1.4
+
+  redis-sentinel1:
+    container_name: redis-sentinel1
+    image: redis:7.4.0-alpine
     volumes:
       - ./sentinel1:/data/sentinel
-
-  sentinel2:
-    image: docker.io/redis:7.4.0-alpine
-    container_name: redis-sentinel-2
     ports:
-      - 26380:26379
-    command: redis-sentinel /data/sentinel/sentinel.conf --sentinel
-    restart: always
+      - "27001:26379"
+    command: ["redis-sentinel", "/data/sentinel/sentinel.conf"]
+    depends_on:
+      - redis-master
+    networks:
+      redis-network:
+        ipv4_address: 172.30.1.11
+
+  redis-sentinel2:
+    container_name: redis-sentinel2
+    image: redis:7.4.0-alpine
     volumes:
       - ./sentinel2:/data/sentinel
-
-  sentinel3:
-    image: docker.io/redis:7.4.0-alpine
-    container_name: redis-sentinel-3
     ports:
-      - 26381:26379
-    command: redis-sentinel /data/sentinel/sentinel.conf --sentinel
-    restart: always
+      - "27002:26379"
+    command: [ "redis-sentinel", "/data/sentinel/sentinel.conf" ]
+    depends_on:
+      - redis-master
+    networks:
+      redis-network:
+        ipv4_address: 172.30.1.12
+
+  redis-sentinel3:
+    container_name: redis-sentinel3
+    image: redis:7.4.0-alpine
     volumes:
       - ./sentinel3:/data/sentinel
+    ports:
+      - "27003:26379"
+    command: [ "redis-sentinel", "/data/sentinel/sentinel.conf" ]
+    depends_on:
+      - redis-master
+    networks:
+      redis-network:
+        ipv4_address: 172.30.1.13
 ```
+
+在每一个sentinel.conf的配置文件中添加如下相同的内容
 
 `/data/redis/sentinel{1..3}/sentinel.conf`
 
 ```bash
-bind 0.0.0.0
-daemonize yes
-protected-mode no
-port 26379
 dir "/data/sentinel"
-pidfile "/var/run/redis-sentinel.pid"
-syslog-enabled no
-sentinel deny-scripts-reconfig yes
-sentinel monitor mymaster x.x.x.x 6379 2
+sentinel monitor mymaster 172.30.1.2 6379 2
+sentinel down-after-milliseconds mymaster 5000
+sentinel failover-timeout mymaster 60000
 sentinel auth-pass mymaster xxxxxxxx
 ```
 
-[Redis 7.x 哨兵配置](https://juejin.cn/post/7417635848987164687)
+启动服务
 
-# 3 单节点实例
+```bash
+cd /data/redis
+docker-compose up -d redis-master
+docker-compose up -d redis-replica1
+docker-compose up -d redis-replica2
+docker-compose up -d redis-sentinel1
+docker-compose up -d redis-sentinel2
+docker-compose up -d redis-sentinel3
+```
+
+参考文章
+
+- [Redis 7.x 哨兵配置](https://juejin.cn/post/7417635848987164687)
+- [Docker-Compose部署Redis(v7.2)哨兵模式](https://blog.csdn.net/m0_51390969/article/details/135413933)
+
+# 2 单节点实例
 
 ```bash
 version: '3'

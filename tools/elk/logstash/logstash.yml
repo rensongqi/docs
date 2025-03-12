@@ -59,7 +59,7 @@ filter {
                 "carname" => "%{[logfilepath][9]}"
                 "hostname" => "%{[logfilepath][10]}"
                 "version" => "%{[logfilepath][11]}"
-                "oss" => "http://ossapi.cowarobot.cn:9000/vehicle-stubs/$Logger/%{[logfilepath][6]}/%{[logfilepath][7]}/%{[logfilepath][8]}/%{[logfilepath][9]}/%{[logfilepath][10]}/%{[logfilepath][11]}/%{[logfilepath][12]}"
+                "oss" => "http://ossapi.rsq.cn:9000/vehicle-stubs/$Logger/%{[logfilepath][6]}/%{[logfilepath][7]}/%{[logfilepath][8]}/%{[logfilepath][9]}/%{[logfilepath][10]}/%{[logfilepath][11]}/%{[logfilepath][12]}"
             }
             convert => {
                 "carname" => "string"
@@ -94,7 +94,7 @@ filter {
                 "carname" => "%{[logfilepath][9]}"
                 "hostname" => "%{[logfilepath][10]}"
                 "version" => "%{[logfilepath][11]}"
-                "oss" => "http://ossapi.cowarobot.cn:9000/vehicle-stubs/$Logger/%{[logfilepath][6]}/%{[logfilepath][7]}/%{[logfilepath][8]}/%{[logfilepath][9]}/%{[logfilepath][10]}/%{[logfilepath][11]}/%{[logfilepath][12]}"
+                "oss" => "http://ossapi.rsq.cn:9000/vehicle-stubs/$Logger/%{[logfilepath][6]}/%{[logfilepath][7]}/%{[logfilepath][8]}/%{[logfilepath][9]}/%{[logfilepath][10]}/%{[logfilepath][11]}/%{[logfilepath][12]}"
                 "log_timestamp" => "%{log_month} %{log_day} %{log_time} 2025"
                 "level" => "info"
             }
