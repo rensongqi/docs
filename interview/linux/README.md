@@ -30,7 +30,7 @@
 
 ## 开发侧
 
-1. docker ansible ssh执行playbook完会后会遗留下来一批僵尸进程不会被回收，持续一段时间之后产生内存泄漏问题，宿主机运行playboos后进程则会被init进程回收
+1. docker ansible ssh执行playbook完会后会遗留下来一批僵尸进程不会被回收，持续一段时间之后产生内存泄漏问题，宿主机运行playbook后进程则会被init进程回收
     > https://blog.phusion.nl/2015/01/20/docker-and-the-pid-1-zombie-reaping-problem/
 
     当在Docker容器中运行Ansible时，僵尸进程问题产生的主要原因有：
