@@ -129,3 +129,20 @@ weed filer.meta.backup -config=/data/seaweedfs/config/filer.toml  -filer="172.16
 ```
 
 - `-restart`参数可以支持异步增量同步，前提是已经全量同步过一次数据，但是该参数并不能确保增量数据完全同步，所以为了尽量减少对现有存储的影响，应在老存储的Filer切到Tikv之后再执行上述命令进行全量元数据同步
+
+# 备份还原
+> TiUP支持对TiDB的快速备份和还原，但是对TiKV的支持比较弱，可以通过tiup命令在主控机执行备份还原的动作
+> 需要事先创建好备份的目录
+## 备份
+> 由于SeaweedFS中TiKV使用的是txn格式，故仅备份 txnKV 数据即可：
+```bash
+mkdir /tmp/br_backup
+tiup br backup txn --pd "172.16.9.175:2379" --storage "local:///tmp/br_backup" --log-file backupfull.log
+```
+## 还原
+> 1. 可指定集群任意一个pd
+> 2. 数据只能恢复到全新部署的tikv集群
+> 3. 执行恢复命令服务器上需要有元数据文件:/path/to/backup/backupmeta，所有tikv节点需要有真正备份的全数据，由于备份数据只在leader pd节点生成，所以需要将该数据拷贝到其他tikv节点的备份路径下，最好找一块共享盘实现
+```bash
+tiup br restore txn --pd "172.16.9.175:2379" --storage "local:///tmp/br_backup"
+```
