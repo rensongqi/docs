@@ -132,7 +132,23 @@ weed filer.meta.backup -config=/data/seaweedfs/config/filer.toml  -filer="172.16
 
 # 备份还原
 > TiUP支持对TiDB的快速备份和还原，但是对TiKV的支持比较弱，可以通过tiup命令在主控机执行备份还原的动作
+> 
 > 需要事先创建好备份的目录
+
+参考文章：
+- [TiKV 数据备份咨询](https://asktug.com/t/topic/1024515/3)
+- [TiDB 备份与恢复功能使用概述](https://docs.pingcap.com/zh/tidb/stable/br-use-overview/)
+
+安装 br
+
+```bash
+tiup install br
+
+# 如若手动安装返回成功，但是执行备份命令报错找不到br，可以尝试执行如下命令
+cd ~/.tiup/components/br/v8.5.1/
+tar -xf br-v8.5.1-linux-amd64.tar.gz
+```
+
 ## 备份
 > 由于SeaweedFS中TiKV使用的是txn格式，故仅备份 txnKV 数据即可：
 ```bash
