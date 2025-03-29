@@ -142,7 +142,7 @@ mkdir /data/kafka/kraft -p
 version: "3"
 services:
   kafka:
-    image: harbor.cowarobot.cn/docker.io/bitnami/kafka:3.7.0
+    image: bitnami/kafka:3.7.0
     network_mode: host
     container_name: kafka
     user: root
@@ -170,7 +170,7 @@ services:
 version: "3"
 services:
   kafka:
-    image: harbor.cowarobot.cn/docker.io/bitnami/kafka:3.7.0
+    image: bitnami/kafka:3.7.0
     network_mode: host
     container_name: kafka
     user: root
@@ -198,7 +198,7 @@ services:
 version: "3"
 services:
   kafka:
-    image: harbor.cowarobot.cn/docker.io/bitnami/kafka:3.7.0
+    image: bitnami/kafka:3.7.0
     network_mode: host
     container_name: kafka
     user: root
@@ -223,7 +223,7 @@ services:
       - ./kraft:/bitnami/kafka/data:rw
 
   kafka_exporter:
-    image: harbor.cowarobot.cn/library/kafka-exporter:latest
+    image: kafka-exporter:latest
     command:
      - '--kafka.server=172.16.10.85:9092'
      - '--kafka.server=172.16.10.86:9092'
