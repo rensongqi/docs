@@ -1,5 +1,7 @@
 - [1 单节点部署](#1-单节点部署)
 - [2 多节点部署](#2-多节点部署)
+  - [2.1 基于Zookeeper](#21-基于zookeeper)
+  - [2.2 基于Kraft](#22-基于kraft)
 - [3 公网访问kafka](#3-公网访问kafka)
 - [4 生产者](#4-生产者)
 - [5 消费者](#5-消费者)
@@ -44,6 +46,8 @@ services:
 ```
 
 # 2 多节点部署
+
+## 2.1 基于Zookeeper
 
 ```yaml
 # 172.18.11.109 节点
@@ -123,6 +127,110 @@ services:
       - ./logs:/opt/kafka/logs
       - /var/run/docker.sock:/var/run/docker.sock
     restart: always
+```
+
+## 2.2 基于Kraft
+
+初始化
+```
+mkdir /data/kafka/kraft -p
+```
+
+`/data/kafka/docker-compose.yml`
+```yaml
+# 172.16.10.85
+version: "3"
+services:
+  kafka:
+    image: harbor.cowarobot.cn/docker.io/bitnami/kafka:3.7.0
+    network_mode: host
+    container_name: kafka
+    user: root
+    ports:
+      - 9092:9092
+      - 9093:9093
+    environment:
+      - TZ=Asia/Shanghai
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_LOG_RETENTION_HOURS=72
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_KRAFT_CLUSTER_ID=5L6g3nShT-eMCtK--X86sw
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@172.16.10.85:9093,2@172.16.10.86:9093,3@172.16.10.87:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_HEAP_OPTS=-Xmx10G -Xms10G
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.16.10.85:9092
+      - KAFKA_CFG_NODE_ID=1
+    volumes:
+      - ./kraft:/bitnami/kafka/data:rw
+
+# 172.16.10.86
+version: "3"
+services:
+  kafka:
+    image: harbor.cowarobot.cn/docker.io/bitnami/kafka:3.7.0
+    network_mode: host
+    container_name: kafka
+    user: root
+    ports:
+      - 9092:9092
+      - 9093:9093
+    environment:
+      - TZ=Asia/Shanghai
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_LOG_RETENTION_HOURS=72
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_KRAFT_CLUSTER_ID=5L6g3nShT-eMCtK--X86sw
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@172.16.10.85:9093,2@172.16.10.86:9093,3@172.16.10.87:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_HEAP_OPTS=-Xmx10G -Xms10G
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.16.10.86:9092
+      - KAFKA_CFG_NODE_ID=2
+    volumes:
+      - ./kraft:/bitnami/kafka/data:rw
+
+# 172.16.10.87
+version: "3"
+services:
+  kafka:
+    image: harbor.cowarobot.cn/docker.io/bitnami/kafka:3.7.0
+    network_mode: host
+    container_name: kafka
+    user: root
+    ports:
+      - 9092:9092
+      - 9093:9093
+    environment:
+      - TZ=Asia/Shanghai
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_LOG_RETENTION_HOURS=72
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_KRAFT_CLUSTER_ID=5L6g3nShT-eMCtK--X86sw
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@172.16.10.85:9093,2@172.16.10.86:9093,3@172.16.10.87:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_HEAP_OPTS=-Xmx10G -Xms10G
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.16.10.87:9092
+      - KAFKA_CFG_NODE_ID=3
+    volumes:
+      - ./kraft:/bitnami/kafka/data:rw
+
+  kafka_exporter:
+    image: harbor.cowarobot.cn/library/kafka-exporter:latest
+    command:
+     - '--kafka.server=172.16.10.85:9092'
+     - '--kafka.server=172.16.10.86:9092'
+     - '--kafka.server=172.16.10.87:9092'
+    restart: always
+    ports:
+    - "9308:9308"
 ```
 
 # 3 公网访问kafka
