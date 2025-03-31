@@ -129,11 +129,36 @@ services:
     restart: always
 ```
 
+监控：
+
+```yml
+version: '3'
+services:
+  kafka_exporter:
+    image: kafka-exporter:latest
+    command:
+     - '--kafka.server=172.18.11.109:9092'
+     - '--kafka.server=172.18.11.110:9092'
+     - '--kafka.server=172.18.11.111:9092'
+    restart: always
+    ports:
+    - "9308:9308"
+```
+
 ## 2.2 基于Kraft
+
+> 需要注意的是，基于Kraft的Kafka创建进入容器之后不能像使用zookeeper那样创建topic，具体原因可参考文章：https://github.com/wurstmeister/kafka-docker/issues/390
+> 
+> 解决办法，进入容器之后需要执行命令 `unset KAFKA_OPTS` ，然后才能执行如下命令
 
 初始化
 ```
 mkdir /data/kafka/kraft -p
+
+# 下载jmx_prometheus_javaagent-0.20.0.jar
+cd /data/kafka/
+wget https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.20.0/jmx_prometheus_javaagent-0.20.0.jar
+wget https://raw.githubusercontent.com/prometheus/jmx_exporter/refs/heads/main/examples/kafka-kraft-3_0_0.yml
 ```
 
 `/data/kafka/docker-compose.yml`
@@ -163,8 +188,11 @@ services:
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.16.10.85:9092
       - KAFKA_CFG_NODE_ID=1
+      - KAFKA_OPTS=-javaagent:/opt/jmx_prometheus_javaagent-0.20.0.jar=9999:/opt/kafka-kraft-3_0_0.yml
     volumes:
       - ./kraft:/bitnami/kafka/data:rw
+      - ./jmx_prometheus_javaagent-0.20.0.jar:/opt/jmx_prometheus_javaagent-0.20.0.jar
+      - ./kafka-kraft-3_0_0.yml:/opt/kafka-kraft-3_0_0.yml
 
 # 172.16.10.86
 version: "3"
@@ -191,8 +219,11 @@ services:
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.16.10.86:9092
       - KAFKA_CFG_NODE_ID=2
+      - KAFKA_OPTS=-javaagent:/opt/jmx_prometheus_javaagent-0.20.0.jar=9999:/opt/kafka-kraft-3_0_0.yml
     volumes:
       - ./kraft:/bitnami/kafka/data:rw
+      - ./jmx_prometheus_javaagent-0.20.0.jar:/opt/jmx_prometheus_javaagent-0.20.0.jar
+      - ./kafka-kraft-3_0_0.yml:/opt/kafka-kraft-3_0_0.yml
 
 # 172.16.10.87
 version: "3"
@@ -219,19 +250,17 @@ services:
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://172.16.10.87:9092
       - KAFKA_CFG_NODE_ID=3
+      - KAFKA_OPTS=-javaagent:/opt/jmx_prometheus_javaagent-0.20.0.jar=9999:/opt/kafka-kraft-3_0_0.yml
     volumes:
       - ./kraft:/bitnami/kafka/data:rw
-
-  kafka_exporter:
-    image: kafka-exporter:latest
-    command:
-     - '--kafka.server=172.16.10.85:9092'
-     - '--kafka.server=172.16.10.86:9092'
-     - '--kafka.server=172.16.10.87:9092'
-    restart: always
-    ports:
-    - "9308:9308"
+      - ./jmx_prometheus_javaagent-0.20.0.jar:/opt/jmx_prometheus_javaagent-0.20.0.jar
+      - ./kafka-kraft-3_0_0.yml:/opt/kafka-kraft-3_0_0.yml
 ```
+
+监控：
+> 需要基于jmx_exporter实现kraft的监控指标数据的获取
+- [prometheus监控Kafka (kafka_exporter和 jmx_exporter)](https://blog.csdn.net/u010533742/article/details/119992040)
+
 
 # 3 公网访问kafka
 

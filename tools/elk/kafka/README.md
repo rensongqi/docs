@@ -1,6 +1,10 @@
 
 # 常用命令
 
+> 需要注意的是，基于Kraft的Kafka创建进入容器之后不能像使用zookeeper那样创建topic，具体原因可参考文章：https://github.com/wurstmeister/kafka-docker/issues/390
+> 
+> 解决办法，进入容器之后需要执行命令 `unset KAFKA_OPTS` ，然后才能执行如下命令
+
 ```bash
 # 创建topic
 kafka-topics.sh --create --bootstrap-server localhost:9092 --topic filebeat
