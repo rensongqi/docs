@@ -15,6 +15,7 @@
       - [屏蔽IP的方法](#屏蔽ip的方法)
 - [Lua](#lua)
 - [手动容器编译openresty支持slice模块](#手动容器编译openresty支持slice模块)
+- [多层Nginx获取真实客户端IP](#多层nginx获取真实客户端ip)
 
 # Nginx 模板
 
@@ -338,3 +339,20 @@ deny all;
 - [Dockerfile 编写openresty 支持slice模块切片回源](http://www.xixicool.com/884.html)
 - [Centos7编译openssl 3.0.x](https://blog.csdn.net/qq_42020376/article/details/143949796)
 
+# 多层Nginx获取真实客户端IP
+> 参考文章：[nginx多级代理配置获取客户端真实ip](https://blog.csdn.net/qq_44659804/article/details/136693563)
+> 
+> nginx1 -> nginx2 -> nginx3
+
+nginx2配置
+```
+http {
+    # 增加获取真实客户端IP的逻辑
+    set_real_ip_from 172.16.108.0/24; # nginx1所在的网段或者具体的ip地址
+    real_ip_header  X-Forwarded-For;
+    real_ip_recursive on;
+    log_format custom '$remote_addr - $remote_user [$time_local] '
+              '"$request" $status $body_bytes_sent '
+              '"$http_referer" "$http_user_agent" "$http_x_forwarded_for"';
+}
+```

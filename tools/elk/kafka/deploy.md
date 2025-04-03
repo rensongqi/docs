@@ -145,6 +145,9 @@ services:
     - "9308:9308"
 ```
 
+Grafana看板ID
+- [7589-kafka-exporter-overview](https://grafana.com/grafana/dashboards/7589-kafka-exporter-overview/)
+
 ## 2.2 基于Kraft
 
 > 需要注意的是，基于Kraft的Kafka创建进入容器之后不能像使用zookeeper那样创建topic，具体原因可参考文章：https://github.com/wurstmeister/kafka-docker/issues/390
@@ -261,6 +264,9 @@ services:
 > 需要基于jmx_exporter实现kraft的监控指标数据的获取
 - [prometheus监控Kafka (kafka_exporter和 jmx_exporter)](https://blog.csdn.net/u010533742/article/details/119992040)
 
+Grafana看板ID 
+> 下载对应的json文件之后，需要将该文件中所有的 `kafka_controller_kafkacontroller_controllerstate` 改为 `kafka_controller_kafkacontroller_activecontrollercount` 后看板才可使用（实际上对应的就是获取看板变量的label），修改的值要保证在对应的exporter metrics中搜索到，不一定非要修改上上述值，了解即可
+- [11962-kafka-metrics](https://grafana.com/grafana/dashboards/11962-kafka-metrics/)
 
 # 3 公网访问kafka
 
