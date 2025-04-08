@@ -455,6 +455,19 @@ PUT my_index-*/_settings
 }
 ```
 
+解释为什么某个分片不能分配给某个节点
+```
+GET _cluster/allocation/explain
+
+
+GET _cluster/allocation/explain
+{
+  "index": "syslog-net-2025.03.25",
+  "shard": 0,
+  "primary": false
+}
+```
+
 配置index lifecycle policy
 
 
