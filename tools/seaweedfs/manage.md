@@ -98,9 +98,15 @@ umount  -l <mount point>
 > 卷垃圾自动清理失败，需要手动清理卷垃圾，找到`volume id`对应的Volume节点中具体的存储目录，执行如下命令
 
 ### 3.3.1 手动清理
+方法一：
+> 需要停止volume server，成功率很高
+> 找到volume id 对应的Volume节点中具体的存储目录，执行如下命令
+
 ```bash
 find /disk/local_disk* -type f -name "collection_1174*"
 
+# 停止volume server节点执行如下操作
+# 执行停止操作之前需要设置指定的volume id只读
 weed compact -method 1 -dir=/disk/local_disk2 -volumeId=1174 -collection=collection
 
 # 重命名，需要将原有数据跟现有数据改名
@@ -113,8 +119,22 @@ mv collection_1174.cpx collection_1174.idx
 
 # 重启volume节点
 ```
+
+方法二：
+> 无需重启volume server，在线清理，但会有一定的失败率
+```bash
+weed shell
+lock
+
+# 清理多个卷垃圾
+# 需要注意的是，如果执行如下命令没有处于阻塞状态，则该命令无效
+volume.vacuum -garbageThreshold 0.1 -volumeId 6575;volume.vacuum -garbageThreshold 0.1 -volumeId 6576;volume.vacuum -garbageThreshold 0.1 -volumeId 6577
+unlock
+```
+
 ### 3.3.2 半自动化清理
 > 需要先找出来垃圾比较大或failed compact volume的volume所在服务器的绝对路径
+> 需要停止volume server
 
 ```bash
 docker logs seaweedfs-volume --tail=20000 2>&1 | grep 'failed compact volume'

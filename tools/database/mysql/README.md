@@ -1,4 +1,6 @@
-- [1 Centos7 安装MySQL 8.0](#1-centos7-安装mysql-80)
+- [1 安装MySQL 8.0](#1-安装mysql-80)
+  - [1 Centos7本地部署](#1-centos7本地部署)
+  - [1.2 Docker-compose部署](#12-docker-compose部署)
 - [2 SQL 基础语法](#2-sql-基础语法)
   - [1.1 SQL DML 和 DDL](#11-sql-dml-和-ddl)
   - [1.2 创建表](#12-创建表)
@@ -21,8 +23,9 @@
   - [4.1 复制表](#41-复制表)
 - [5 SQL 内置语法](#5-sql-内置语法)
 
-# 1 Centos7 安装MySQL 8.0
+# 1 安装MySQL 8.0
 
+## 1 Centos7本地部署
 ```bash
 # 1 如果有老版本，应该先卸载老版本
 rpm -qa | grep -i mysql
@@ -80,7 +83,52 @@ FLUSH Privileges;
 # mysql 8.0 默认字符集 CHARSET=utf8mb4
 ```
 
+## 1.2 Docker-compose部署
 
+初始化
+
+```bash
+mkdir /data/mysql/{data,conf} -p
+```
+
+/data/mysql/conf/my.cnf
+> 配置`skip_ssl`之后客户端连接时无需指定 `--ssl-mode=DISABLE`
+```
+[mysqld]
+user=mysql
+default-storage-engine=INNODB
+character-set-server=utf8
+character-set-client-handshake=FALSE
+collation-server=utf8_unicode_ci
+init_connect='SET NAMES utf8'
+max_connections=5000
+server-id=100
+skip-log-bin
+datadir=/var/lib/mysql/
+skip_ssl
+[client]
+default-character-set=utf8
+[mysql]
+default-character-set=utf8
+```
+
+/data/mysql/docker-compose.yml
+```yml
+version: '3'
+services:
+  mysql:
+    image: mysql:8.0.3
+    container_name: mysql
+    volumes:
+      - ./data:/var/lib/mysql
+      - ./conf/my.cnf:/etc/my.cnf
+    environment:
+      - "MYSQL_ROOT_PASSWORD=xxxxxxxxxx"
+      - "TZ=Asia/Shanghai"
+    ports:
+      - 3306:3306
+    restart: always
+```
 
 # 2 SQL 基础语法
 
