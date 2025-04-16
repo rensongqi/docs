@@ -93,3 +93,35 @@ services:
       minio2: 172.16.100.108
       minio3: 172.16.100.109
 ```
+
+# mc 命令
+> [mc下载]](https://github.com/minio/mc/releases)
+
+```bash
+# 设置别名
+mc alias set local-oss http://ossapi.cowarobot.cn:9000 <secretKey> <secretPass>
+
+# 拷贝本地文件至oss
+mc cp --recursive /PATH/TO/FILE_OR_DIR local-oss/<bucket>/<path>
+
+# 拷贝oss数据至本地
+mc cp --recursive local-oss/<bucket>/<path> /PATH/TO/DIR
+
+# 跟踪bucket
+mc admin trace -v --path <bucket>/* local-oss
+
+# 冷热分层取回数据
+mc ilm restore --days 9999 local-oss/<bucket>/<file_path>
+
+# 删除Tier
+mc ilm tier rm local-oss AI-COWA-PREDICTIONELRTD-WARM
+
+# 其它分层配置
+mc ilm rule add --expire-days 90 --noncurrent-expire-days 30  local-oss/mydata
+
+mc ilm rule add --expire-delete-marker local-oss/mydata
+
+mc ilm rule add --transition-days 30 --transition-tier "COLDTIER" local-oss/mydata
+
+mc ilm rule add --noncurrent-transition-days 7 --noncurrent-transition-tier "COLDTIER"
+```
