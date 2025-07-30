@@ -95,7 +95,7 @@ services:
 ```
 
 # mc 命令
-> [mc下载]](https://github.com/minio/mc/releases)
+> [mc下载](https://github.com/minio/mc/releases)
 
 ```bash
 # 设置别名
