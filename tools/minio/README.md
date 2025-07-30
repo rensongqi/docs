@@ -99,7 +99,7 @@ services:
 
 ```bash
 # 设置别名
-mc alias set local-oss http://ossapi.cowarobot.cn:9000 <secretKey> <secretPass>
+mc alias set local-oss http://ossapi.rsq.cn:9000 <secretKey> <secretPass>
 
 # 拷贝本地文件至oss
 mc cp --recursive /PATH/TO/FILE_OR_DIR local-oss/<bucket>/<path>
@@ -114,7 +114,7 @@ mc admin trace -v --path <bucket>/* local-oss
 mc ilm restore --days 9999 local-oss/<bucket>/<file_path>
 
 # 删除Tier
-mc ilm tier rm local-oss AI-COWA-PREDICTIONELRTD-WARM
+mc ilm tier rm local-oss AI-RSQ-PREDICTIONELRTD-WARM
 
 # 其它分层配置
 mc ilm rule add --expire-days 90 --noncurrent-expire-days 30  local-oss/mydata
